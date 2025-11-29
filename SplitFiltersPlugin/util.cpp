@@ -33,19 +33,20 @@ std::wstring utf8_to_wide(const std::string& s) {
 /// @param alias エイリアスデータ
 /// @return [Object] ～ [Object.0] の直前までのエイリアスデータ
 static std::string extract_object_header(const std::string& alias) {
-	int header_start = alias.find("[Object]");
+	size_t header_start = alias.find("[Object]");
 	if (header_start == std::string::npos) return "";
 
-	int obj0_start = alias.find("[Object.0]");
+	size_t obj0_start = alias.find("[Object.0]");
 	if (obj0_start == std::string::npos) return "";
 
 	return alias.substr(header_start, obj0_start - header_start);
 }
 
+
 /// 指定された位置が行頭であるかを判定する
 /// @param head 判定を行うインデックス
 /// @return head の直前の文字が'\\n'であれば true
-static bool is_at_line_start(const std::string& text, int head) {
+static bool is_at_line_start(const std::string& text, size_t head) {
 	// 直前が \n の場合
 	if (head > 0) {
 		if (text[head - 1] == '\n') {
@@ -55,6 +56,7 @@ static bool is_at_line_start(const std::string& text, int head) {
 	return false;
 }
 
+
 /// [Object.x] を展開し、ObjSec ベクターに格納
 /// @param alias エイリアスデータ
 /// @return 解析済みの ObjSec ベクター
@@ -62,18 +64,18 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 	std::vector<ObjSec> out;
 
 	// [Object.0]以降を探すように初期化
-	int start_pos = alias.find("[Object.0]");
+	size_t start_pos = alias.find("[Object.0]");
 	if (start_pos == std::string::npos) {
 		return out;
 	}
 
 	const std::string& text_to_parse = alias;
-	int pos = start_pos;
+	size_t pos = start_pos;
 
 	// --- [Object.x] セクションの繰り返し処理 ---
 	while (pos < text_to_parse.size()) {
 		// 現在位置から次の [Object. を探す
-		int head = text_to_parse.find("[Object.", pos);
+		size_t head = text_to_parse.find("[Object.", pos);
 		if (head == std::string::npos) break;
 
 		// 行頭の [Object.x] でない場合は無視
@@ -83,14 +85,14 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 		}
 
 		// セクションヘッダーの ] を探す
-		int bracket_end = text_to_parse.find("]", head);
+		size_t bracket_end = text_to_parse.find("]", head);
 		if (bracket_end == std::string::npos) break;
 
 		// 現在セクションの次の [Object. を見つける
-		int next_head = std::string::npos;
-		int search_pos = bracket_end + 1;
+		size_t next_head = std::string::npos;
+		size_t search_pos = bracket_end + 1;
 		while (search_pos < text_to_parse.size()) {
-			int potential_next = text_to_parse.find("[Object.", search_pos);
+			size_t potential_next = text_to_parse.find("[Object.", search_pos);
 			if (potential_next == std::string::npos) break;
 
 			// 行頭チェック
@@ -118,10 +120,10 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 		// effect.name の値を抽出
 		std::string effect_name;
 		const char* effect_key = "effect.name=";
-		int efp = sec.find(effect_key);
+		size_t efp = sec.find(effect_key);
 		if (efp != std::string::npos) {
 			efp += std::strlen(effect_key);
-			int eol = sec.find('\r', efp);
+			size_t eol = sec.find('\r', efp);
 			if (eol != std::string::npos) {
 				effect_name = sec.substr(efp, eol - efp);
 			}
@@ -155,6 +157,7 @@ int calc_start_index(const std::vector<ObjSec>& objs) {
 	return 1;
 }
 
+
 /// ObjSec からエイリアスデータを再構築する
 /// @param objs 処理対象の ObjSec
 /// @param start_index 再構築処理を開始する ObjSec のインデックス
@@ -177,11 +180,12 @@ static std::string rebuild_alias(
 		new_idx++;
 
 		std::string sec = objs[i].sec;
-		int old_end = sec.find("]");
+		size_t old_end = sec.find("]");
 		result += std::string(new_head) + sec.substr(old_end + 1);
 	}
 	return result;
 }
+
 
 /// エイリアスに付くフィルタを抽出して、フィルタ効果オブジェクトを作成
 /// @param alias: エイリアスデータ
@@ -197,6 +201,7 @@ std::string build_target_alias(const std::string alias) {
 	return header + rebuild_alias(objs, start, 0);
 }
 
+
 /// エイリアスに付くフィルタを抽出して、フィルタ効果群を作成（グループ制御に紐づける用）
 /// @param alias: エイリアスデータ
 /// @return フィルタ効果オブジェクト群を含むエイリアス文字列。
@@ -209,6 +214,7 @@ static std::string build_target_alias_group(const std::string alias) {
 	// 再構築 [Object.1]～[Object.n]
 	return rebuild_alias(objs, start, 1);
 }
+
 
 /// エイリアスに付くフィルタを抽出して、グループ制御オブジェクトを作成
 /// @param edit: 編集セクション構造体
@@ -241,6 +247,7 @@ OBJECT_HANDLE try_create_group(
 
 	return nullptr;
 }
+
 
 /// 元オブジェクトから分離フィルタを削除したものを作成
 /// @param alias: エイリアスデータ

@@ -1,4 +1,3 @@
-#pragma once
 #include <windows.h>
 #include "plugin2.h"
 #include <vector>

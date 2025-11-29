@@ -1,4 +1,3 @@
-#pragma once
 #include "main.h" 
 
 // --- ŠO•”•Ï”‚ÌÀ‘Ì’è‹` ---
