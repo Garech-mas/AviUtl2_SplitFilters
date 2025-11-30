@@ -181,13 +181,9 @@ EXTERN_C __declspec(dllexport) void InitializeLogger(LOG_HANDLE* handle) {
 }
 
 
-static void __cdecl menu_dummy_callback(EDIT_SECTION*) {}
-
-
 /// プラグイン登録
 EXTERN_C __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host) {
 	host->set_plugin_information(PLUGIN_INFO);
-	host->register_layer_menu(L"ダミー", menu_dummy_callback);
 	host->register_object_menu(L"フィルタ分離", split_filters_callback);
 	host->register_object_menu(L"フィルタ分離（グループ制御）", split_filters_for_group_callback);
 	edit_handle = host->create_edit_handle();
