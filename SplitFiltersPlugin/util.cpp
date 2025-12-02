@@ -1,6 +1,6 @@
 #include "util.h"
 
-/// AviUtl2 ‚ÌƒƒCƒ“ƒEƒBƒ“ƒhƒE‚ğæ“¾‚·‚é
+/// AviUtl2 ã®ãƒ¡ã‚¤ãƒ³ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’å–å¾—ã™ã‚‹
 HWND get_aviutl2_window()
 {
 	const std::wstring className = L"aviutl2Manager";
@@ -12,15 +12,15 @@ HWND get_aviutl2_window()
 		GetWindowThreadProcessId(hWnd, &windowPid);
 
 		if (windowPid == currentPid) {
-			return hWnd; // Å‰‚ÉŒ©‚Â‚©‚Á‚½‚à‚Ì‚ğ•Ô‚·
+			return hWnd; // æœ€åˆã«è¦‹ã¤ã‹ã£ãŸã‚‚ã®ã‚’è¿”ã™
 		}
 	}
 
-	return nullptr; // Œ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡
+	return nullptr; // è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆ
 }
 
 
-/// UTF-8‚Ìstd::string‚ğAstd::wstring‚É•ÏŠ·‚·‚é
+/// UTF-8ã®std::stringã‚’ã€std::wstringã«å¤‰æ›ã™ã‚‹
 std::wstring utf8_to_wide(const std::string& s) {
 	size_t size = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), s.size(), NULL, 0);
 	std::wstring result(size, 0);
@@ -29,9 +29,9 @@ std::wstring utf8_to_wide(const std::string& s) {
 }
 
 
-/// [Object] ƒwƒbƒ_‚ğ”²‚«o‚·
-/// @param alias ƒGƒCƒŠƒAƒXƒf[ƒ^
-/// @return [Object] ` [Object.0] ‚Ì’¼‘O‚Ü‚Å‚ÌƒGƒCƒŠƒAƒXƒf[ƒ^
+/// [Object] ãƒ˜ãƒƒãƒ€ã‚’æŠœãå‡ºã™
+/// @param alias ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
+/// @return [Object] ï½ [Object.0] ã®ç›´å‰ã¾ã§ã®ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
 static std::string extract_object_header(const std::string& alias) {
 	size_t header_start = alias.find("[Object]");
 	if (header_start == std::string::npos) return "";
@@ -43,11 +43,11 @@ static std::string extract_object_header(const std::string& alias) {
 }
 
 
-/// w’è‚³‚ê‚½ˆÊ’u‚ªs“ª‚Å‚ ‚é‚©‚ğ”»’è‚·‚é
-/// @param head ”»’è‚ğs‚¤ƒCƒ“ƒfƒbƒNƒX
-/// @return head ‚Ì’¼‘O‚Ì•¶š‚ª'\\n'‚Å‚ ‚ê‚Î true
+/// æŒ‡å®šã•ã‚ŒãŸä½ç½®ãŒè¡Œé ­ã§ã‚ã‚‹ã‹ã‚’åˆ¤å®šã™ã‚‹
+/// @param head åˆ¤å®šã‚’è¡Œã†ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+/// @return head ã®ç›´å‰ã®æ–‡å­—ãŒ'\\n'ã§ã‚ã‚Œã° true
 static bool is_at_line_start(const std::string& text, size_t head) {
-	// ’¼‘O‚ª \n ‚Ìê‡
+	// ç›´å‰ãŒ \n ã®å ´åˆ
 	if (head > 0) {
 		if (text[head - 1] == '\n') {
 			return true;
@@ -57,13 +57,13 @@ static bool is_at_line_start(const std::string& text, size_t head) {
 }
 
 
-/// [Object.x] ‚ğ“WŠJ‚µAObjSec ƒxƒNƒ^[‚ÉŠi”[
-/// @param alias ƒGƒCƒŠƒAƒXƒf[ƒ^
-/// @return ‰ğÍÏ‚İ‚Ì ObjSec ƒxƒNƒ^[
+/// [Object.x] ã‚’å±•é–‹ã—ã€ObjSec ãƒ™ã‚¯ã‚¿ãƒ¼ã«æ ¼ç´
+/// @param alias ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
+/// @return è§£ææ¸ˆã¿ã® ObjSec ãƒ™ã‚¯ã‚¿ãƒ¼
 std::vector<ObjSec> parse_objects(const std::string& alias) {
 	std::vector<ObjSec> out;
 
-	// [Object.0]ˆÈ~‚ğ’T‚·‚æ‚¤‚É‰Šú‰»
+	// [Object.0]ä»¥é™ã‚’æ¢ã™ã‚ˆã†ã«åˆæœŸåŒ–
 	size_t start_pos = alias.find("[Object.0]");
 	if (start_pos == std::string::npos) {
 		return out;
@@ -72,30 +72,30 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 	const std::string& text_to_parse = alias;
 	size_t pos = start_pos;
 
-	// --- [Object.x] ƒZƒNƒVƒ‡ƒ“‚ÌŒJ‚è•Ô‚µˆ— ---
+	// --- [Object.x] ã‚»ã‚¯ã‚·ãƒ§ãƒ³ã®ç¹°ã‚Šè¿”ã—å‡¦ç† ---
 	while (pos < text_to_parse.size()) {
-		// Œ»İˆÊ’u‚©‚çŸ‚Ì [Object. ‚ğ’T‚·
+		// ç¾åœ¨ä½ç½®ã‹ã‚‰æ¬¡ã® [Object. ã‚’æ¢ã™
 		size_t head = text_to_parse.find("[Object.", pos);
 		if (head == std::string::npos) break;
 
-		// s“ª‚Ì [Object.x] ‚Å‚È‚¢ê‡‚Í–³‹
+		// è¡Œé ­ã® [Object.x] ã§ãªã„å ´åˆã¯ç„¡è¦–
 		if (!is_at_line_start(text_to_parse, head)) {
 			pos = head + 1;
 			continue;
 		}
 
-		// ƒZƒNƒVƒ‡ƒ“ƒwƒbƒ_[‚Ì ] ‚ğ’T‚·
+		// ã‚»ã‚¯ã‚·ãƒ§ãƒ³ãƒ˜ãƒƒãƒ€ãƒ¼ã® ] ã‚’æ¢ã™
 		size_t bracket_end = text_to_parse.find("]", head);
 		if (bracket_end == std::string::npos) break;
 
-		// Œ»İƒZƒNƒVƒ‡ƒ“‚ÌŸ‚Ì [Object. ‚ğŒ©‚Â‚¯‚é
+		// ç¾åœ¨ã‚»ã‚¯ã‚·ãƒ§ãƒ³ã®æ¬¡ã® [Object. ã‚’è¦‹ã¤ã‘ã‚‹
 		size_t next_head = std::string::npos;
 		size_t search_pos = bracket_end + 1;
 		while (search_pos < text_to_parse.size()) {
 			size_t potential_next = text_to_parse.find("[Object.", search_pos);
 			if (potential_next == std::string::npos) break;
 
-			// s“ªƒ`ƒFƒbƒN
+			// è¡Œé ­ãƒã‚§ãƒƒã‚¯
 			if (is_at_line_start(text_to_parse, potential_next)) {
 				next_head = potential_next;
 				break;
@@ -103,21 +103,21 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 			search_pos = potential_next + 1;
 		}
 
-		// Ÿ‚Ì [Object. ‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡A•¶š—ñ‚Ì––”ö‚Ü‚Å
+		// æ¬¡ã® [Object. ãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆã€æ–‡å­—åˆ—ã®æœ«å°¾ã¾ã§
 		if (next_head == std::string::npos) {
 			next_head = text_to_parse.size();
 		}
 
 
-		// ƒZƒNƒVƒ‡ƒ“‚²‚Æ‚ÉObjSec‚Öƒp[ƒX‚·‚é
+		// ã‚»ã‚¯ã‚·ãƒ§ãƒ³ã”ã¨ã«ObjSecã¸ãƒ‘ãƒ¼ã‚¹ã™ã‚‹
 		std::string sec = text_to_parse.substr(head, next_head - head);
 
-		// ƒCƒ“ƒfƒbƒNƒX”Ô†‚ğ’Šo
+		// ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç•ªå·ã‚’æŠ½å‡º
 		const int prefix_len = 8;
 		std::string num_str = text_to_parse.substr(head + prefix_len, bracket_end - (head + prefix_len));
 		int idx = std::stoi(num_str);
 
-		// effect.name ‚Ì’l‚ğ’Šo
+		// effect.name ã®å€¤ã‚’æŠ½å‡º
 		std::string effect_name;
 		const char* effect_key = "effect.name=";
 		size_t efp = sec.find(effect_key);
@@ -129,7 +129,7 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 			}
 		}
 
-		// ’Šo‚µ‚½î•ñ‚ğŒ‹‰ÊƒxƒNƒ^‚É’Ç‰Á‚µAŸ‚ÌŒŸõˆÊ’u‚ğXV‚·‚é
+		// æŠ½å‡ºã—ãŸæƒ…å ±ã‚’çµæœãƒ™ã‚¯ã‚¿ã«è¿½åŠ ã—ã€æ¬¡ã®æ¤œç´¢ä½ç½®ã‚’æ›´æ–°ã™ã‚‹
 		out.push_back({ sec, idx, effect_name });
 		pos = next_head;
 	}
@@ -138,19 +138,19 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 }
 
 
-/// ƒtƒBƒ‹ƒ^Œø‰Ê‚ÌŠJnƒCƒ“ƒfƒbƒNƒX‚ğŒvZ
-/// @param objs ‰ğÍÏ‚İ‚Ì ObjSec ƒxƒNƒ^[
-/// @return [Object.1] ‚ªo—ÍØ‘ÖƒZƒNƒVƒ‡ƒ“i•W€•`‰æ‚È‚Çj‚È‚ç 2A‚»‚êˆÈŠO‚Í 1
+/// ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã®é–‹å§‹ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’è¨ˆç®—
+/// @param objs è§£ææ¸ˆã¿ã® ObjSec ãƒ™ã‚¯ã‚¿ãƒ¼
+/// @return [Object.1] ãŒå‡ºåŠ›åˆ‡æ›¿ã‚»ã‚¯ã‚·ãƒ§ãƒ³ï¼ˆæ¨™æº–æç”»ãªã©ï¼‰ãªã‚‰ 2ã€ãã‚Œä»¥å¤–ã¯ 1
 int calc_start_index(const std::vector<ObjSec>& objs) {
 	static const char* output_section_list[] = {
-		u8"•W€•`‰æ",
-		u8"‰¹ºÄ¶",
-		u8"‰f‘œÄ¶",
-		u8"Šî–{o—Í",
-		u8"ƒp[ƒeƒBƒNƒ‹o—Í"
+		u8"æ¨™æº–æç”»",
+		u8"éŸ³å£°å†ç”Ÿ",
+		u8"æ˜ åƒå†ç”Ÿ",
+		u8"åŸºæœ¬å‡ºåŠ›",
+		u8"ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«å‡ºåŠ›"
 	};
 
-	// [Object.1]‚ªo—ÍØ‘ÖƒZƒNƒVƒ‡ƒ“‚È‚ç2”Ô–Ú ‚»‚êˆÈŠO‚Í1”Ô–Ú
+	// [Object.1]ãŒå‡ºåŠ›åˆ‡æ›¿ã‚»ã‚¯ã‚·ãƒ§ãƒ³ãªã‚‰2ç•ªç›® ãã‚Œä»¥å¤–ã¯1ç•ªç›®
 	for (auto& s : output_section_list) {
 		if (objs[1].effect_name == s) return 2;
 	}
@@ -158,11 +158,11 @@ int calc_start_index(const std::vector<ObjSec>& objs) {
 }
 
 
-/// ObjSec ‚©‚çƒGƒCƒŠƒAƒXƒf[ƒ^‚ğÄ\’z‚·‚é
-/// @param objs ˆ—‘ÎÛ‚Ì ObjSec
-/// @param start_index Ä\’zˆ—‚ğŠJn‚·‚é ObjSec ‚ÌƒCƒ“ƒfƒbƒNƒX
-/// @param base_index V‚µ‚¢ [Object.x] ‚ÌŠî“_
-/// @return Ä\’z‚³‚ê‚½ƒGƒCƒŠƒAƒXƒf[ƒ^
+/// ObjSec ã‹ã‚‰ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’å†æ§‹ç¯‰ã™ã‚‹
+/// @param objs å‡¦ç†å¯¾è±¡ã® ObjSec
+/// @param start_index å†æ§‹ç¯‰å‡¦ç†ã‚’é–‹å§‹ã™ã‚‹ ObjSec ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+/// @param base_index æ–°ã—ã„ [Object.x] ã®åŸºç‚¹
+/// @return å†æ§‹ç¯‰ã•ã‚ŒãŸã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
 static std::string rebuild_alias(
 	const std::vector<ObjSec>& objs,
 	int start_index,
@@ -187,9 +187,9 @@ static std::string rebuild_alias(
 }
 
 
-/// ƒGƒCƒŠƒAƒX‚É•t‚­ƒtƒBƒ‹ƒ^‚ğ’Šo‚µ‚ÄAƒtƒBƒ‹ƒ^Œø‰ÊƒIƒuƒWƒFƒNƒg‚ğì¬
-/// @param alias: ƒGƒCƒŠƒAƒXƒf[ƒ^
-/// @return ƒtƒBƒ‹ƒ^Œø‰ÊƒIƒuƒWƒFƒNƒg‚ÌƒGƒCƒŠƒAƒXƒf[ƒ^
+/// ã‚¨ã‚¤ãƒªã‚¢ã‚¹ã«ä»˜ããƒ•ã‚£ãƒ«ã‚¿ã‚’æŠ½å‡ºã—ã¦ã€ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆ
+/// @param alias: ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
+/// @return ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
 std::string build_target_alias(const std::string alias) {
 	std::string header = extract_object_header(alias);
 	const auto objs = parse_objects(alias);
@@ -197,48 +197,48 @@ std::string build_target_alias(const std::string alias) {
 
 	int start = calc_start_index(objs);
 
-	// Ä\’z [Object]`[Object.0]`[Object.n]
+	// å†æ§‹ç¯‰ [Object]ï½[Object.0]ï½[Object.n]
 	return header + rebuild_alias(objs, start, 0);
 }
 
 
-/// ƒGƒCƒŠƒAƒX‚É•t‚­ƒtƒBƒ‹ƒ^‚ğ’Šo‚µ‚ÄAƒtƒBƒ‹ƒ^Œø‰ÊŒQ‚ğì¬iƒOƒ‹[ƒv§Œä‚É•R‚Ã‚¯‚é—pj
-/// @param alias: ƒGƒCƒŠƒAƒXƒf[ƒ^
-/// @return ƒtƒBƒ‹ƒ^Œø‰ÊƒIƒuƒWƒFƒNƒgŒQ‚ğŠÜ‚ŞƒGƒCƒŠƒAƒX•¶š—ñB
+/// ã‚¨ã‚¤ãƒªã‚¢ã‚¹ã«ä»˜ããƒ•ã‚£ãƒ«ã‚¿ã‚’æŠ½å‡ºã—ã¦ã€ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœç¾¤ã‚’ä½œæˆï¼ˆã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ã«ç´ã¥ã‘ã‚‹ç”¨ï¼‰
+/// @param alias: ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
+/// @return ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆç¾¤ã‚’å«ã‚€ã‚¨ã‚¤ãƒªã‚¢ã‚¹æ–‡å­—åˆ—ã€‚
 static std::string build_target_alias_group(const std::string alias) {
 	auto objs = parse_objects(alias);
 	if (objs.empty()) return "";
 
 	int start = calc_start_index(objs);
 
-	// Ä\’z [Object.1]`[Object.n]
+	// å†æ§‹ç¯‰ [Object.1]ï½[Object.n]
 	return rebuild_alias(objs, start, 1);
 }
 
 
-/// ƒGƒCƒŠƒAƒX‚É•t‚­ƒtƒBƒ‹ƒ^‚ğ’Šo‚µ‚ÄAƒOƒ‹[ƒv§ŒäƒIƒuƒWƒFƒNƒg‚ğì¬
-/// @param edit: •ÒWƒZƒNƒVƒ‡ƒ“\‘¢‘Ì
-/// @param alias: ƒGƒCƒŠƒAƒXƒf[ƒ^
-/// @return ƒOƒ‹[ƒv§ŒäƒIƒuƒWƒFƒNƒg‚Ìƒnƒ“ƒhƒ‹ (ì¬‚Å‚«‚È‚¯‚ê‚Î nullptr)
+/// ã‚¨ã‚¤ãƒªã‚¢ã‚¹ã«ä»˜ããƒ•ã‚£ãƒ«ã‚¿ã‚’æŠ½å‡ºã—ã¦ã€ã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ä½œæˆ
+/// @param edit: ç·¨é›†ã‚»ã‚¯ã‚·ãƒ§ãƒ³æ§‹é€ ä½“
+/// @param alias: ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
+/// @return ã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒãƒ³ãƒ‰ãƒ« (ä½œæˆã§ããªã‘ã‚Œã° nullptr)
 OBJECT_HANDLE try_create_group(
 	EDIT_SECTION* edit,
 	const std::string& alias,
 	int layer, int start, int length)
 {
-	// [Object] ƒwƒbƒ_‚ğ’Šo
+	// [Object] ãƒ˜ãƒƒãƒ€ã‚’æŠ½å‡º
 	std::string header = extract_object_header(alias);
 
-	// [Object.1]` ‚ğì¬
+	// [Object.1]ï½ ã‚’ä½œæˆ
 	std::string obj1 = build_target_alias_group(alias);
 
-	// ƒOƒ‹[ƒv§Œä‚ğì¬
+	// ã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ã‚’ä½œæˆ
 	{
 		std::string a = header + std::string(GROUP_OBJ0) + obj1;
 		auto o = edit->create_object_from_alias(a.c_str(), layer, start, length);
 		if (o) return o;
 	}
 
-	// ã‹L‚ªdifferent effect type‚Åì¬‚Å‚«‚È‚©‚Á‚½‚çAƒOƒ‹[ƒv§Œä(‰¹º) ‚ğì‚é
+	// ä¸Šè¨˜ãŒdifferent effect typeã§ä½œæˆã§ããªã‹ã£ãŸã‚‰ã€ã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡(éŸ³å£°) ã‚’ä½œã‚‹
 	{
 		std::string a = header + std::string(GROUP_AUDIO_OBJ0) + obj1;
 		auto o = edit->create_object_from_alias(a.c_str(), layer, start, length);
@@ -249,20 +249,20 @@ OBJECT_HANDLE try_create_group(
 }
 
 
-/// Œ³ƒIƒuƒWƒFƒNƒg‚©‚ç•ª—£ƒtƒBƒ‹ƒ^‚ğíœ‚µ‚½‚à‚Ì‚ğì¬
-/// @param alias: ƒGƒCƒŠƒAƒXƒf[ƒ^
+/// å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‹ã‚‰åˆ†é›¢ãƒ•ã‚£ãƒ«ã‚¿ã‚’å‰Šé™¤ã—ãŸã‚‚ã®ã‚’ä½œæˆ
+/// @param alias: ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿
 std::string build_source_alias(const std::string alias) {
-	// ƒGƒCƒŠƒAƒXƒf[ƒ^‚ğƒp[ƒX
+	// ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ‘ãƒ¼ã‚¹
 	const auto objs = parse_objects(alias);
 	if (objs.empty()) return "";
 
-	// ƒtƒBƒ‹ƒ^Œø‰Ê‚ÌŠJn’n“_‚Ü‚Å‚ğ‘ÎÛ
+	// ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã®é–‹å§‹åœ°ç‚¹ã¾ã§ã‚’å¯¾è±¡
 	const int max_idx = calc_start_index(objs);
 
-	// ƒIƒuƒWƒFƒNƒg‚ÌÄ\’z
+	// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å†æ§‹ç¯‰
 	std::string header = extract_object_header(alias);
 
-	// [Object.0] ` [Object.0 or 1] ‚Ü‚Å‚ğØ‚èo‚·
+	// [Object.0] ï½ [Object.0 or 1] ã¾ã§ã‚’åˆ‡ã‚Šå‡ºã™
 	std::vector<ObjSec> filtered_objs;
 	filtered_objs.assign(objs.begin(), objs.begin() + max_idx);
 

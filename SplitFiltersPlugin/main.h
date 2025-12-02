@@ -1,18 +1,18 @@
 #include "util.h"
 #include "logger2.h"
 
-// --- ŠO•”•Ï”éŒ¾ ---
+// --- å¤–éƒ¨å¤‰æ•°å®£è¨€ ---
 extern EDIT_HANDLE* edit_handle;
 extern LOG_HANDLE* logger;
 
 
-// --- ƒvƒ‰ƒOƒCƒ“î•ñ’è” ---
-#define PLUGIN_NAME L"ƒtƒBƒ‹ƒ^•ª—£"
+// --- ãƒ—ãƒ©ã‚°ã‚¤ãƒ³æƒ…å ±å®šæ•° ---
+#define PLUGIN_NAME L"ãƒ•ã‚£ãƒ«ã‚¿åˆ†é›¢"
 #define PLUGIN_VERSION L"v1.00"
 #define TESTED_BETA L"beta22"
-#define PLUGIN_INFO PLUGIN_NAME " " PLUGIN_VERSION " (ƒeƒXƒgÏ: " TESTED_BETA ") by Garech"
+#define PLUGIN_INFO PLUGIN_NAME " " PLUGIN_VERSION " (ãƒ†ã‚¹ãƒˆæ¸ˆ: " TESTED_BETA ") by Garech"
 
 
-// --- DLLƒGƒNƒXƒ|[ƒgŠÖ”éŒ¾ ---
+// --- DLLã‚¨ã‚¯ã‚¹ãƒãƒ¼ãƒˆé–¢æ•°å®£è¨€ ---
 EXTERN_C __declspec(dllexport) void InitializeLogger(LOG_HANDLE* handle);
 EXTERN_C __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host);

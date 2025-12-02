@@ -1,17 +1,17 @@
 #include "main.h" 
 
-// --- ŠO•”•Ï”‚ÌÀ‘Ì’è‹` ---
+// --- å¤–éƒ¨å¤‰æ•°ã®å®Ÿä½“å®šç¾© ---
 EDIT_HANDLE* edit_handle;
 LOG_HANDLE* logger;
 
 
-/// ƒIƒuƒWƒFƒNƒgƒƒjƒ…[uƒtƒBƒ‹ƒ^•ª—£v
-/// ‘I‘ğ’†ƒIƒuƒWƒFƒNƒg‚ÌƒtƒBƒ‹ƒ^Œø‰Ê•”‚ğƒtƒBƒ‹ƒ^ƒIƒuƒWƒFƒNƒg‚É•ª—£‚·‚é
+/// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ã€Œãƒ•ã‚£ãƒ«ã‚¿åˆ†é›¢ã€
+/// é¸æŠä¸­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœéƒ¨ã‚’ãƒ•ã‚£ãƒ«ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«åˆ†é›¢ã™ã‚‹
 static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 	int sel_num = edit->get_selected_object_num();
-	// ‘I‘ğ’†ƒIƒuƒWƒFƒNƒg‚ª‚È‚¢ê‡i‚ ‚è“¾‚È‚¢‚¯‚Ç”O‚Ì‚½‚ßj
+	// é¸æŠä¸­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒãªã„å ´åˆï¼ˆã‚ã‚Šå¾—ãªã„ã‘ã©å¿µã®ãŸã‚ï¼‰
 	if (sel_num <= 0) {
-		logger->error(logger, L"‘I‘ğƒIƒuƒWƒFƒNƒg‚ª‚ ‚è‚Ü‚¹‚ñB");
+		logger->error(logger, L"é¸æŠã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
 		return;
 	}
 
@@ -20,37 +20,37 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 
 		auto lf = edit->get_object_layer_frame(obj);
 		auto alias = edit->get_object_alias(obj);
-		// get_object_alias‚É¸”s‚µ‚½ê‡i•s³‚ÈƒIƒuƒWƒFƒNƒgHj
+		// get_object_aliasã«å¤±æ•—ã—ãŸå ´åˆï¼ˆä¸æ­£ãªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼Ÿï¼‰
 		if (!alias) {
-			logger->error(logger, L"ƒGƒCƒŠƒAƒXƒf[ƒ^‚Ìæ“¾‚É¸”s‚µ‚Ü‚µ‚½B");
+			logger->error(logger, L"ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿ã®å–å¾—ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
 			continue;
 		}
 
-		// === ‰ğÍŠJn ===
+		// === è§£æé–‹å§‹ ===
 		std::string a(alias);
 		auto objs = parse_objects(a);
 
-		// ’Ç‰ÁƒtƒBƒ‹ƒ^Œø‰Ê‚ª‚È‚¢ê‡
+		// è¿½åŠ ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœãŒãªã„å ´åˆ
 		if (calc_start_index(objs) >= objs.size()) {
-			logger->info(logger, L"’Šo‚Å‚«‚éƒtƒBƒ‹ƒ^Œø‰Ê‚ª‚ ‚è‚Ü‚¹‚ñB");
+			logger->info(logger, L"æŠ½å‡ºã§ãã‚‹ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
 			continue;
 		}
 
-		// ƒtƒBƒ‹ƒ^Œø‰ÊƒIƒuƒWƒFƒNƒg
+		// ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 		std::string target = build_target_alias(alias);
 		if (target.empty()) {
-			logger->error(logger, L"ƒtƒBƒ‹ƒ^Œø‰ÊƒIƒuƒWƒFƒNƒg‚Ì¶¬‚É¸”s‚µ‚Ü‚µ‚½B");
+			logger->error(logger, L"ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
 			continue;
 		}
 
-		// Œ³ƒIƒuƒWƒFƒNƒg - •ª—£ƒtƒBƒ‹ƒ^
+		// å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ - åˆ†é›¢ãƒ•ã‚£ãƒ«ã‚¿
 		std::string new_src_alias = build_source_alias(alias);
 		if (new_src_alias.empty()) {
-			logger->warn(logger, L"Œ³ƒIƒuƒWƒFƒNƒg‚Ì¶¬‚É¸”s‚µ‚Ü‚µ‚½B");
+			logger->warn(logger, L"å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
 			continue;
 		}
 
-		// === Œ³ƒIƒuƒWƒFƒNƒg‚Ì’u‚«Š·‚¦ ===
+		// === å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç½®ãæ›ãˆ ===
 		edit->delete_object(obj);
 		{
 			auto new_obj0 = edit->create_object_from_alias(
@@ -60,13 +60,13 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 				lf.end - lf.start
 			);
 			if (!new_obj0) {
-				logger->error(logger, L"Œ³ƒIƒuƒWƒFƒNƒg‚ÌÄì¬‚É¸”s‚µ‚Ü‚µ‚½B");
-				MessageBox(get_aviutl2_window(), L"Œ³ƒIƒuƒWƒFƒNƒg‚ÌÄì¬‚É¸”s‚µ‚Ü‚µ‚½B", PLUGIN_NAME, MB_ICONWARNING);
+				logger->error(logger, L"å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å†ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
+				MessageBox(get_aviutl2_window(), L"å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å†ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", PLUGIN_NAME, MB_ICONWARNING);
 				continue;
 			}
 		}
 
-		// === •¡»æƒtƒBƒ‹ƒ^‚Ì’Ç‰Á ===
+		// === è¤‡è£½å…ˆãƒ•ã‚£ãƒ«ã‚¿ã®è¿½åŠ  ===
 		bool created = false;
 
 		for (int layer = lf.layer + 1; layer < SAFE_LAYER_LIMIT; layer++) {
@@ -84,8 +84,8 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 		}
 
 		if (!created) {
-			logger->error(logger, L"ƒtƒBƒ‹ƒ^Œø‰ÊƒIƒuƒWƒFƒNƒg‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B");
-			MessageBox(get_aviutl2_window(), L"ƒtƒBƒ‹ƒ^Œø‰ÊƒIƒuƒWƒFƒNƒg‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", PLUGIN_NAME, MB_ICONWARNING);
+			logger->error(logger, L"ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
+			MessageBox(get_aviutl2_window(), L"ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", PLUGIN_NAME, MB_ICONWARNING);
 		}
 
 
@@ -93,13 +93,13 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 }
 
 
-/// ƒIƒuƒWƒFƒNƒgƒƒjƒ…[uƒtƒBƒ‹ƒ^•ª—£iƒOƒ‹[ƒv§Œäjv
-/// ‘I‘ğ’†ƒIƒuƒWƒFƒNƒg‚ÌƒtƒBƒ‹ƒ^Œø‰Ê•”‚ğƒOƒ‹[ƒv§ŒäƒIƒuƒWƒFƒNƒg‚É•ª—£‚·‚é
+/// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼ã€Œãƒ•ã‚£ãƒ«ã‚¿åˆ†é›¢ï¼ˆã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ï¼‰ã€
+/// é¸æŠä¸­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœéƒ¨ã‚’ã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«åˆ†é›¢ã™ã‚‹
 static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 	int sel_num = edit->get_selected_object_num();
-	// ‘I‘ğ’†ƒIƒuƒWƒFƒNƒg‚ª‚È‚¢ê‡i‚ ‚è“¾‚È‚¢‚¯‚Ç”O‚Ì‚½‚ßj
+	// é¸æŠä¸­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒãªã„å ´åˆï¼ˆã‚ã‚Šå¾—ãªã„ã‘ã©å¿µã®ãŸã‚ï¼‰
 	if (sel_num <= 0) {
-		logger->error(logger, L"‘I‘ğƒIƒuƒWƒFƒNƒg‚ª‚ ‚è‚Ü‚¹‚ñB");
+		logger->error(logger, L"é¸æŠã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
 		return;
 	}
 
@@ -108,30 +108,30 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 
 		auto lf = edit->get_object_layer_frame(obj);
 		auto alias = edit->get_object_alias(obj);
-		// get_object_alias‚É¸”s‚µ‚½ê‡i•s³‚ÈƒIƒuƒWƒFƒNƒgHj
+		// get_object_aliasã«å¤±æ•—ã—ãŸå ´åˆï¼ˆä¸æ­£ãªã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼Ÿï¼‰
 		if (!alias) {
-			logger->error(logger, L"ƒGƒCƒŠƒAƒXƒf[ƒ^‚Ìæ“¾‚É¸”s‚µ‚Ü‚µ‚½B");
+			logger->error(logger, L"ã‚¨ã‚¤ãƒªã‚¢ã‚¹ãƒ‡ãƒ¼ã‚¿ã®å–å¾—ã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
 			continue;
 		}
 
-		// === ‰ğÍŠJn ===
+		// === è§£æé–‹å§‹ ===
 		std::string a(alias);
 		auto objs = parse_objects(a);
 
-		// ’Ç‰ÁƒtƒBƒ‹ƒ^Œø‰Ê‚ª‚È‚¢ê‡
+		// è¿½åŠ ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœãŒãªã„å ´åˆ
 		if (calc_start_index(objs) >= objs.size()) {
-			logger->info(logger, L"’Šo‚Å‚«‚éƒtƒBƒ‹ƒ^Œø‰Ê‚ª‚ ‚è‚Ü‚¹‚ñB");
+			logger->info(logger, L"æŠ½å‡ºã§ãã‚‹ãƒ•ã‚£ãƒ«ã‚¿åŠ¹æœãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
 			continue;
 		}
 
-		// Œ³ƒIƒuƒWƒFƒNƒg - •ª—£ƒtƒBƒ‹ƒ^
+		// å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ - åˆ†é›¢ãƒ•ã‚£ãƒ«ã‚¿
 		std::string new_src_alias = build_source_alias(alias);
 		if (new_src_alias.empty()) {
-			logger->warn(logger, L"Œ³ƒIƒuƒWƒFƒNƒg‚Ì¶¬‚É¸”s‚µ‚Ü‚µ‚½B");
+			logger->warn(logger, L"å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
 			continue;
 		}
 
-		// === Œ³ƒIƒuƒWƒFƒNƒg‚Ì’u‚«Š·‚¦ (1ƒŒƒCƒ„[‰º‚É’u‚­) ===
+		// === å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç½®ãæ›ãˆ (1ãƒ¬ã‚¤ãƒ¤ãƒ¼ä¸‹ã«ç½®ã) ===
 		edit->delete_object(obj);
 		bool created = false;
 
@@ -150,12 +150,12 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 		}
 
 		if (!created) {
-			logger->error(logger, L"Œ³ƒIƒuƒWƒFƒNƒg‚ÌÄì¬‚É¸”s‚µ‚Ü‚µ‚½B");
-			MessageBox(get_aviutl2_window(), L"Œ³ƒIƒuƒWƒFƒNƒg‚ÌÄì¬‚É¸”s‚µ‚Ü‚µ‚½B", PLUGIN_NAME, MB_ICONWARNING);
+			logger->error(logger, L"å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å†ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
+			MessageBox(get_aviutl2_window(), L"å…ƒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å†ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", PLUGIN_NAME, MB_ICONWARNING);
 			continue;
 		}
 
-		// ‘I‘ğƒŒƒCƒ„[‚ÉƒOƒ‹[ƒv§Œä‚ğ’Ç‰Á
+		// é¸æŠãƒ¬ã‚¤ãƒ¤ãƒ¼ã«ã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ã‚’è¿½åŠ 
 		auto group_obj = try_create_group(
 			edit,
 			std::string(alias),
@@ -164,8 +164,8 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 		);
 
 		if (!group_obj) {
-			logger->error(logger, L"ƒOƒ‹[ƒv§ŒäƒIƒuƒWƒFƒNƒg‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B");
-			MessageBox(get_aviutl2_window(), L"ƒOƒ‹[ƒv§ŒäƒIƒuƒWƒFƒNƒg‚Ìì¬‚É¸”s‚µ‚Ü‚µ‚½B", PLUGIN_NAME, MB_ICONWARNING);
+			logger->error(logger, L"ã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚");
+			MessageBox(get_aviutl2_window(), L"ã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚", PLUGIN_NAME, MB_ICONWARNING);
 			continue;
 		}
 
@@ -175,16 +175,16 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 }
 
 
-///	ƒƒOo—Í‹@”\‰Šú‰»
+///	ãƒ­ã‚°å‡ºåŠ›æ©Ÿèƒ½åˆæœŸåŒ–
 EXTERN_C __declspec(dllexport) void InitializeLogger(LOG_HANDLE* handle) {
 	logger = handle;
 }
 
 
-/// ƒvƒ‰ƒOƒCƒ““o˜^
+/// ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ç™»éŒ²
 EXTERN_C __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host) {
 	host->set_plugin_information(PLUGIN_INFO);
-	host->register_object_menu(L"ƒtƒBƒ‹ƒ^•ª—£", split_filters_callback);
-	host->register_object_menu(L"ƒtƒBƒ‹ƒ^•ª—£iƒOƒ‹[ƒv§Œäj", split_filters_for_group_callback);
+	host->register_object_menu(L"ãƒ•ã‚£ãƒ«ã‚¿åˆ†é›¢", split_filters_callback);
+	host->register_object_menu(L"ãƒ•ã‚£ãƒ«ã‚¿åˆ†é›¢ï¼ˆã‚°ãƒ«ãƒ¼ãƒ—åˆ¶å¾¡ï¼‰", split_filters_for_group_callback);
 	edit_handle = host->create_edit_handle();
 }

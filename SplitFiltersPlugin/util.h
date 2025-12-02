@@ -3,36 +3,36 @@
 #include <vector>
 #include <string>
 
-// --- �萔/�}�N���i�G�C���A�X��͂ɕK�v�Ȃ��́j ---
+// --- 定数/マクロ（エイリアス解析に必要なもの） ---
 static const char* GROUP_OBJ0 = u8R"(
 [Object.0]
-effect.name=�O���[�v����
+effect.name=グループ制御
 X=0.00
 Y=0.00
 Z=0.00
 Group=1
-X����]=0.00
-Y����]=0.00
-Z����]=0.00
-�g�嗦=100.000
-�Ώۃ��C���[��=1
+X軸回転=0.00
+Y軸回転=0.00
+Z軸回転=0.00
+拡大率=100.000
+対象レイヤー数=1
 )";
 
 static const char* GROUP_AUDIO_OBJ0 = u8R"(
 [Object.0]
-effect.name=�O���[�v����(����)
-����=100.00
-���E=0.00
-�Ώۃ��C���[��=1
+effect.name=グループ制御(音声)
+音量=100.00
+左右=0.00
+対象レイヤー数=1
 )";
 
-/// �I�u�W�F�N�g������Ă���Ƃ��ɍĎ��s����񐔂̏��
+/// オブジェクトが被っているときに再試行する回数の上限
 const int SAFE_LAYER_LIMIT = 1000;
 
-/// �p�[�X�ς݃G�C���A�X�f�[�^
+/// パース済みエイリアスデータ
 struct ObjSec {
-	std::string sec;	// [Object.x] �Z�N�V�����̕�����
-	int index;			// [Object.x] �� x �̕���
+	std::string sec;	// [Object.x] セクションの文字列
+	int index;			// [Object.x] の x の部分
 	std::string effect_name;
 };
 
