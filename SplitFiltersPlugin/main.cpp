@@ -77,6 +77,7 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 				lf.end - lf.start
 			);
 			if (new_obj) {
+				edit->set_object_name(new_obj, nullptr);
 				edit->set_focus_object(new_obj);
 				created = true;
 				break;
@@ -169,6 +170,7 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 			continue;
 		}
 
+		edit->set_object_name(group_obj, nullptr);
 		edit->set_focus_object(group_obj);
 
 	}
