@@ -245,6 +245,16 @@ EXTERN_C __declspec(dllexport) void InitializeLogger(LOG_HANDLE* handle) {
 }
 
 
+/// プラグインDLL初期化
+EXTERN_C __declspec(dllexport) bool InitializePlugin(DWORD version) {
+	if (version < TESTED_BETA_NO) {
+		MessageBox(get_aviutl2_window(), L"フィルタ分離を動作させるためには、AviUtl2 " TESTED_BETA L"が必要です。\nAviUtl2を更新してください。", PLUGIN_TITLE, MB_ICONWARNING);
+		return false;
+	}
+	return true;
+}
+
+
 /// プラグイン登録
 EXTERN_C __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host) {
 	host->set_plugin_information(PLUGIN_INFO);

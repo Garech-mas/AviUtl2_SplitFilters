@@ -10,6 +10,7 @@ extern LOG_HANDLE* logger;
 #define PLUGIN_NAME L"フィルタ分離"
 #define PLUGIN_VERSION L"v1.01"
 #define TESTED_BETA L"beta23a"
+#define TESTED_BETA_NO 2002301
 #define PLUGIN_TITLE PLUGIN_NAME " " PLUGIN_VERSION
 #define PLUGIN_INFO PLUGIN_NAME " " PLUGIN_VERSION L" (テスト済: " TESTED_BETA L") by Garech"
 
