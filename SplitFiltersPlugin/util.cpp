@@ -1,8 +1,7 @@
 #include "util.h"
 
 /// AviUtl2 のメインウィンドウを取得する
-HWND get_aviutl2_window()
-{
+HWND get_aviutl2_window() {
 	const std::wstring className = L"aviutl2Manager";
 	DWORD currentPid = GetCurrentProcessId();
 	HWND hWnd = nullptr;
@@ -32,7 +31,7 @@ std::wstring utf8_to_wide(const std::string& s) {
 /// [Object] ヘッダを抜き出す
 /// @param alias エイリアスデータ
 /// @return [Object] ～ [Object.0] の直前までのエイリアスデータ
-static std::string extract_object_header(const std::string& alias) {
+std::string extract_object_header(const std::string& alias) {
 	size_t header_start = alias.find("[Object]");
 	if (header_start == std::string::npos) return "";
 
@@ -142,16 +141,8 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 /// @param objs 解析済みの ObjSec ベクター
 /// @return [Object.1] が出力切替セクション（標準描画など）なら 2、それ以外は 1
 int calc_start_index(const std::vector<ObjSec>& objs) {
-	static const char* output_section_list[] = {
-		u8"標準描画",
-		u8"音声再生",
-		u8"映像再生",
-		u8"基本出力",
-		u8"パーティクル出力"
-	};
-
 	// [Object.1]が出力切替セクションなら2番目 それ以外は1番目
-	for (auto& s : output_section_list) {
+	for (auto& s : OUTPUT_SECTION_LIST) {
 		if (objs[1].effect_name == s) return 2;
 	}
 	return 1;
@@ -163,7 +154,7 @@ int calc_start_index(const std::vector<ObjSec>& objs) {
 /// @param start_index 再構築処理を開始する ObjSec のインデックス
 /// @param base_index 新しい [Object.x] の基点
 /// @return 再構築されたエイリアスデータ
-static std::string rebuild_alias(
+std::string rebuild_alias(
 	const std::vector<ObjSec>& objs,
 	int start_index,
 	int base_index

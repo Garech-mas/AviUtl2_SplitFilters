@@ -26,6 +26,23 @@ effect.name=グループ制御(音声)
 対象レイヤー数=1
 )";
 
+static const char* OUTPUT_SECTION_LIST[] = {
+	u8"標準描画",
+	u8"音声再生",
+	u8"映像再生",
+	u8"基本出力",
+	u8"パーティクル出力"
+};
+
+static const char* NON_OUTPUT_SECTION_OBJECT_LIST[] = {
+	u8"部分フィルタ",
+	u8"グループ制御",
+	u8"グループ制御(音声)",
+	u8"カメラ制御",
+	u8"時間制御(オブジェクト)",
+	u8"シーンチェンジ"
+};
+
 /// オブジェクトが被っているときに再試行する回数の上限
 const int SAFE_LAYER_LIMIT = 1000;
 
@@ -38,6 +55,7 @@ struct ObjSec {
 
 HWND get_aviutl2_window();
 std::wstring utf8_to_wide(const std::string& s);
+std::string extract_object_header(const std::string& alias);
 std::vector<ObjSec> parse_objects(const std::string& alias);
 int calc_start_index(const std::vector<ObjSec>& objs);
 std::string rebuild_alias(
