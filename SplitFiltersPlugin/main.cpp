@@ -196,37 +196,30 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 
 		auto selected_objs = parse_objects(selected_alias_str);
 
-		// --- 結合対象のオブジェクトを探索 ---
-
-		auto filter_obj = selected_obj;
-		auto filter_lf = selected_lf;
-
 		// source_objを探す
-		auto source_obj = edit->find_object(filter_lf.layer - 1, filter_lf.start);
-		if (filter_lf.layer - 1 < 0) {
-			logger->error(logger, L"上のオブジェクトが見つかりませんでした。" PLUGIN_TITLE);
+		auto source_obj = edit->find_object(selected_lf.layer - 1, selected_lf.start);
+		if (selected_lf.layer - 1 < 0) {
+			logger->error(logger, L"上のオブジェクトが存在しません。");
 			return;
-		} else if (!source_obj) {
-			continue;
 		}
 
 		auto source_lf = edit->get_object_layer_frame(source_obj);
-		if (filter_lf.end >= source_lf.start) {
-			break;
+		if (selected_lf.end < source_lf.start) {
+			logger->error(logger, L"上のオブジェクトが見つかりませんでした。");
+			return;
 		}
 
-		auto filter_objs = parse_objects(edit->get_object_alias(filter_obj));
 		auto source_alias = edit->get_object_alias(source_obj);
 		auto source_objs = parse_objects(source_alias);
 
-		// filter_obj -> source_objに結合する
-		source_objs.insert(source_objs.end(), filter_objs.begin(), filter_objs.end());
+		// selected_obj -> source_objに結合する
+		source_objs.insert(source_objs.end(), selected_objs.begin(), selected_objs.end());
 
 		auto merged_alias = extract_object_header(source_alias) + rebuild_alias(source_objs, 0, 0);
 
 		// 削除・配置
 		edit->delete_object(source_obj);
-		edit->delete_object(filter_obj);
+		edit->delete_object(selected_obj);
 
 		auto merged_obj = edit->create_object_from_alias(
 			merged_alias.c_str(),
@@ -235,7 +228,7 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 			source_lf.end - source_lf.start
 		);
 		if (!merged_obj) {
-			logger->error(logger, L"元オブジェクトの再作成に失敗しました。" PLUGIN_TITLE);
+			logger->error(logger, L"元オブジェクトの再作成に失敗しました。");
 			MessageBox(get_aviutl2_window(), L"元オブジェクトの再作成に失敗しました。", PLUGIN_TITLE, MB_ICONWARNING);
 			continue;
 		}
