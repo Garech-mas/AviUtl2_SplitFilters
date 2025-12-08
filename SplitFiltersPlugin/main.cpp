@@ -195,34 +195,35 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 			logger->error(logger, L"選択されたオブジェクトのエイリアス取得に失敗しました。");
 			continue;
 		}
-
 		auto selected_objs = parse_objects(selected_alias_str);
 
 		// source_objを探す
-		auto source_obj = edit->find_object(selected_lf.layer - 1, selected_lf.start);
-		if (selected_lf.layer - 1 < 0) {
-			logger->error(logger, L"上のオブジェクトが存在しません。");
-			return;
-		}
+		OBJECT_HANDLE source_obj = {};
+		OBJECT_LAYER_FRAME source_lf = {};
 
-		auto source_lf = edit->get_object_layer_frame(source_obj);
-		if (selected_lf.end < source_lf.start) {
-			logger->error(logger, L"上のオブジェクトが見つかりませんでした。");
-			return;
+		for (int j = 1; j < SAFE_LAYER_LIMIT; j++) {
+			if (selected_lf.layer - j < 0) {
+				logger->error(logger, L"上のオブジェクトが存在しません。");
+				return;
+			}
+			source_obj = edit->find_object(selected_lf.layer - j, selected_lf.start);
+			if (!source_obj) {
+				continue;
+			}
+			source_lf = edit->get_object_layer_frame(source_obj);
+			if (selected_lf.end >= source_lf.start) {
+				break;
+			}
 		}
-
 		auto source_alias = edit->get_object_alias(source_obj);
 		auto source_objs = parse_objects(source_alias);
-
 		// selected_obj -> source_objに結合する
 		source_objs.insert(source_objs.end(), selected_objs.begin(), selected_objs.end());
-
 		auto merged_alias = extract_object_header(source_alias) + rebuild_alias(source_objs, 0, 0);
 
 		// 削除・配置
 		edit->delete_object(source_obj);
 		edit->delete_object(selected_obj);
-
 		auto merged_obj = edit->create_object_from_alias(
 			merged_alias.c_str(),
 			source_lf.layer,
