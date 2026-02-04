@@ -1,5 +1,6 @@
 #include "util.h"
 #include "logger2.h"
+#include "config2.h"
 
 // --- 外部変数宣言 ---
 extern EDIT_HANDLE* edit_handle;
@@ -8,11 +9,9 @@ extern LOG_HANDLE* logger;
 
 // --- プラグイン情報定数 ---
 #define PLUGIN_NAME L"フィルタ分離"
-#define PLUGIN_VERSION L"v1.02"
-#define TESTED_BETA L"beta23a"
-#define TESTED_BETA_NO 2002301
-#define PLUGIN_TITLE PLUGIN_NAME " " PLUGIN_VERSION
-#define PLUGIN_INFO PLUGIN_NAME " " PLUGIN_VERSION L" (テスト済: " TESTED_BETA L") by Garech"
+#define PLUGIN_VERSION L"v1.03"
+#define TESTED_BETA L"beta31"
+#define TESTED_BETA_NO 2003100
 
 
 // --- DLLエクスポート関数宣言 ---

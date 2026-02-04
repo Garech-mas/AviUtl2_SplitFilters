@@ -18,6 +18,11 @@ Z軸回転=0.00
 対象レイヤー数=1
 )";
 
+static const char* FILTER_OBJECT_OBJ0 = u8R"(
+[Object.0]
+effect.name=フィルタオブジェクト
+)"; 
+
 static const char* GROUP_AUDIO_OBJ0 = u8R"(
 [Object.0]
 effect.name=グループ制御(音声)
@@ -32,15 +37,6 @@ static const char* OUTPUT_SECTION_LIST[] = {
 	u8"映像再生",
 	u8"基本出力",
 	u8"パーティクル出力"
-};
-
-static const char* NON_OUTPUT_SECTION_OBJECT_LIST[] = {
-	u8"部分フィルタ",
-	u8"グループ制御",
-	u8"グループ制御(音声)",
-	u8"カメラ制御",
-	u8"時間制御(オブジェクト)",
-	u8"シーンチェンジ"
 };
 
 /// オブジェクトが被っているときに再試行する回数の上限
@@ -70,3 +66,4 @@ OBJECT_HANDLE try_create_group(
 	EDIT_SECTION* edit,
 	const std::string& alias,
 	int layer, int start, int length);
+int find_available_layer(EDIT_SECTION* edit, int start_layer, int start_frame, int end_frame);

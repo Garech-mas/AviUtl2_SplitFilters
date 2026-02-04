@@ -3,28 +3,34 @@
 // --- 外部変数の実体定義 ---
 EDIT_HANDLE* edit_handle;
 LOG_HANDLE* logger;
+CONFIG_HANDLE* config;
 
+static std::wstring Plugin_Name;
+static std::wstring Plugin_Title;
+static std::wstring Plugin_Info;
+
+static std::vector<std::wstring> g_registered_menu_names;
 
 /// オブジェクトメニュー「フィルタ分離」
 /// 選択中オブジェクトのフィルタ効果部をフィルタオブジェクトに分離する
 static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 	int sel_num = edit->get_selected_object_num();
-	// 選択中オブジェクトがない場合（あり得ないけど念のため）
-	if (sel_num <= 0) {
-		logger->error(logger, L"選択オブジェクトがありません。");
-		return;
-	}
-
-	for (int i = 0; i < sel_num; i++) {
+	int i = 0;
+	do {
 		OBJECT_HANDLE obj = edit->get_selected_object(i);
+		i++;
+		// 選択オブジェクトがなければ、フォーカス中のオブジェクトを使う
+		if (!obj) {
+			obj = edit->get_focus_object();
+			if (!obj) {
+				logger->info(logger, config->translate(config, L"選択オブジェクトがありません。"));
+				MessageBeep(-1);
+				return;
+			}
+		}
 
 		auto lf = edit->get_object_layer_frame(obj);
 		auto alias = edit->get_object_alias(obj);
-		// get_object_aliasに失敗した場合（不正なオブジェクト？）
-		if (!alias) {
-			logger->error(logger, L"エイリアスデータの取得に失敗しました。");
-			continue;
-		}
 
 		// === 解析開始 ===
 		std::string a(alias);
@@ -32,23 +38,16 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 
 		// 追加フィルタ効果がない場合
 		if (calc_start_index(objs) >= objs.size()) {
-			logger->info(logger, L"抽出できるフィルタ効果がありません。");
+			logger->info(logger, config->translate(config, L"抽出できるフィルタ効果がありません。"));
+			MessageBeep(-1);
 			continue;
 		}
 
 		// フィルタ効果オブジェクト
 		std::string target = build_target_alias(alias);
-		if (target.empty()) {
-			logger->error(logger, L"フィルタ効果オブジェクトの生成に失敗しました。");
-			continue;
-		}
 
 		// 元オブジェクト - 分離フィルタ
 		std::string new_src_alias = build_source_alias(alias);
-		if (new_src_alias.empty()) {
-			logger->warn(logger, L"元オブジェクトの生成に失敗しました。");
-			continue;
-		}
 
 		// === 元オブジェクトの置き換え ===
 		edit->delete_object(obj);
@@ -60,8 +59,7 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 				lf.end - lf.start
 			);
 			if (!new_obj0) {
-				logger->error(logger, L"元オブジェクトの再作成に失敗しました。");
-				MessageBox(get_aviutl2_window(), L"元オブジェクトの再作成に失敗しました。", PLUGIN_TITLE, MB_ICONWARNING);
+				logger->warn(logger, config->translate(config, L"元オブジェクトの作成に失敗しました。"));
 				continue;
 			}
 		}
@@ -69,10 +67,12 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 		// === 複製先フィルタの追加 ===
 		bool created = false;
 
-		for (int layer = lf.layer + 1; layer < SAFE_LAYER_LIMIT; layer++) {
+		// 重複しない最初のレイヤーを探して作成する
+		int free_layer = find_available_layer(edit, lf.layer + 1, lf.start, lf.end);
+		if (free_layer != -1) {
 			auto new_obj = edit->create_object_from_alias(
 				target.c_str(),
-				layer,
+				free_layer,
 				lf.start,
 				lf.end - lf.start
 			);
@@ -80,17 +80,14 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 				edit->set_object_name(new_obj, nullptr);
 				edit->set_focus_object(new_obj);
 				created = true;
-				break;
 			}
 		}
 
 		if (!created) {
-			logger->error(logger, L"フィルタ効果オブジェクトの作成に失敗しました。");
-			MessageBox(get_aviutl2_window(), L"フィルタ効果オブジェクトの作成に失敗しました。", PLUGIN_TITLE, MB_ICONWARNING);
+			logger->warn(logger, config->translate(config, L"フィルタ効果オブジェクトの作成に失敗しました。"));
 		}
 
-
-	}
+	} while (i < sel_num);
 }
 
 
@@ -98,22 +95,22 @@ static void __cdecl split_filters_callback(EDIT_SECTION* edit) {
 /// 選択中オブジェクトのフィルタ効果部をグループ制御オブジェクトに分離する
 static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 	int sel_num = edit->get_selected_object_num();
-	// 選択中オブジェクトがない場合（あり得ないけど念のため）
-	if (sel_num <= 0) {
-		logger->error(logger, L"選択オブジェクトがありません。");
-		return;
-	}
-
-	for (int i = 0; i < sel_num; i++) {
+	int i = 0;
+	do {
 		OBJECT_HANDLE obj = edit->get_selected_object(i);
+		i++;
+		// 選択オブジェクトがなければ、フォーカス中のオブジェクトを使う
+		if (!obj) {
+			obj = edit->get_focus_object();
+			if (!obj) {
+				logger->info(logger, config->translate(config, L"選択オブジェクトがありません。"));
+				MessageBeep(-1);
+				return;
+			}
+		}
 
 		auto lf = edit->get_object_layer_frame(obj);
 		auto alias = edit->get_object_alias(obj);
-		// get_object_aliasに失敗した場合（不正なオブジェクト？）
-		if (!alias) {
-			logger->error(logger, L"エイリアスデータの取得に失敗しました。");
-			continue;
-		}
 
 		// === 解析開始 ===
 		std::string a(alias);
@@ -121,38 +118,34 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 
 		// 追加フィルタ効果がない場合
 		if (calc_start_index(objs) >= objs.size()) {
-			logger->info(logger, L"抽出できるフィルタ効果がありません。");
+			logger->info(logger, config->translate(config, L"抽出できるフィルタ効果がありません。"));
+			MessageBeep(-1);
 			continue;
 		}
 
 		// 元オブジェクト - 分離フィルタ
 		std::string new_src_alias = build_source_alias(alias);
-		if (new_src_alias.empty()) {
-			logger->warn(logger, L"元オブジェクトの生成に失敗しました。");
-			continue;
-		}
 
 		// === 元オブジェクトの置き換え (1レイヤー下に置く) ===
 		edit->delete_object(obj);
 		bool created = false;
 
-		for (int layer = lf.layer + 1; layer < SAFE_LAYER_LIMIT; layer++) {
-
+		// 重複しないレイヤーを探して元オブジェクトを作成
+		int free_layer = find_available_layer(edit, lf.layer + 1, lf.start, lf.end);
+		if (free_layer != -1) {
 			auto new_obj = edit->create_object_from_alias(
 				new_src_alias.c_str(),
-				layer,
+				free_layer,
 				lf.start,
 				lf.end - lf.start
 			);
 			if (new_obj) {
 				created = true;
-				break;
 			}
 		}
 
 		if (!created) {
-			logger->error(logger, L"元オブジェクトの再作成に失敗しました。");
-			MessageBox(get_aviutl2_window(), L"元オブジェクトの再作成に失敗しました。", PLUGIN_TITLE, MB_ICONWARNING);
+			logger->warn(logger, config->translate(config, L"元オブジェクトの作成に失敗しました。"));
 			continue;
 		}
 
@@ -165,15 +158,14 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 		);
 
 		if (!group_obj) {
-			logger->error(logger, L"グループ制御オブジェクトの作成に失敗しました。");
-			MessageBox(get_aviutl2_window(), L"グループ制御オブジェクトの作成に失敗しました。", PLUGIN_TITLE, MB_ICONWARNING);
+			logger->warn(logger, config->translate(config, L"グループ制御オブジェクトの作成に失敗しました。"));
 			continue;
 		}
 
 		edit->set_object_name(group_obj, nullptr);
 		edit->set_focus_object(group_obj);
 
-	}
+	} while (i < sel_num);
 }
 
 
@@ -182,20 +174,23 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 /// ※選択中オブジェクトが出力切替オブジェクト持ちなら、その下のオブジェクトを選択中オブジェクトに結合する
 static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 	int sel_num = edit->get_selected_object_num();
-	if (sel_num <= 0) {
-		logger->error(logger, L"選択オブジェクトがありません。");
-		return;
-	}
-
-	for (int i = 0; i < sel_num; i++) {
+	int i = 0;
+	do {
 		OBJECT_HANDLE selected_obj = edit->get_selected_object(i);
-		auto selected_lf = edit->get_object_layer_frame(selected_obj);
-		const char* selected_alias_str = edit->get_object_alias(selected_obj);
-		if (!selected_alias_str) {
-			logger->error(logger, L"選択されたオブジェクトのエイリアス取得に失敗しました。");
-			continue;
+		i++;
+		// 選択オブジェクトがなければ、フォーカス中のオブジェクトを使う
+		if (!selected_obj) {
+			selected_obj = edit->get_focus_object();
+			if (!selected_obj) {
+				logger->info(logger, config->translate(config, L"選択オブジェクトがありません。"));
+				MessageBeep(-1);
+				return;
+			}
 		}
-		auto selected_objs = parse_objects(selected_alias_str);
+		auto selected_lf = edit->get_object_layer_frame(selected_obj);
+		const char* selected_alias_c = edit->get_object_alias(selected_obj);
+		std::string selected_alias = selected_alias_c ? selected_alias_c : std::string();
+		auto selected_objs = parse_objects(selected_alias);
 
 		// source_objを探す
 		OBJECT_HANDLE source_obj = {};
@@ -203,7 +198,8 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 
 		for (int j = 1; j < SAFE_LAYER_LIMIT; j++) {
 			if (selected_lf.layer - j < 0) {
-				logger->error(logger, L"上のオブジェクトが存在しません。");
+				logger->info(logger, config->translate(config, L"上のオブジェクトが存在しません。"));
+				MessageBeep(-1);
 				return;
 			}
 			source_obj = edit->find_object(selected_lf.layer - j, selected_lf.start);
@@ -215,28 +211,51 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 				break;
 			}
 		}
-		auto source_alias = edit->get_object_alias(source_obj);
+		const char* source_alias_c = edit->get_object_alias(source_obj);
+		std::string source_alias = source_alias_c ? source_alias_c : std::string();
 		auto source_objs = parse_objects(source_alias);
 		// selected_obj -> source_objに結合する
-		source_objs.insert(source_objs.end(), selected_objs.begin(), selected_objs.end());
-		auto merged_alias = extract_object_header(source_alias) + rebuild_alias(source_objs, 0, 0);
+		auto filter_start_idx = calc_start_index(selected_objs) - 1;
+		source_objs.insert(source_objs.end(), selected_objs.begin() + filter_start_idx, selected_objs.end());
+		auto merged_alias_str = extract_object_header(source_alias) + rebuild_alias(source_objs, 0, 0);
 
 		// 削除・配置
 		edit->delete_object(source_obj);
 		edit->delete_object(selected_obj);
 		auto merged_obj = edit->create_object_from_alias(
-			merged_alias.c_str(),
+			merged_alias_str.c_str(),
 			source_lf.layer,
 			source_lf.start,
 			source_lf.end - source_lf.start
 		);
 		if (!merged_obj) {
-			logger->error(logger, L"元オブジェクトの再作成に失敗しました。");
-			MessageBox(get_aviutl2_window(), L"元オブジェクトの再作成に失敗しました。", PLUGIN_TITLE, MB_ICONWARNING);
+			
+			MessageBeep(-1);
+			auto chk1 = edit->create_object_from_alias(
+				source_alias.c_str(),
+				source_lf.layer,
+				source_lf.start,
+				source_lf.end - source_lf.start
+			);
+			auto chk2 = edit->create_object_from_alias(
+				selected_alias.c_str(),
+				selected_lf.layer,
+				selected_lf.start,
+				selected_lf.end - selected_lf.start
+			);
+
+			if (chk1 && chk2) {
+				edit->set_focus_object(chk2);
+				logger->warn(logger, config->translate(config, L"フィルタ結合に失敗しました。元オブジェクトを復旧しました。"));
+			}
+			else {
+				logger->warn(logger, config->translate(config, L"元オブジェクトの作成に失敗しました。"));
+			}
 			continue;
 		}
 		edit->set_focus_object(merged_obj);
-	}
+
+	} while (i < sel_num);
 }
 
 
@@ -246,10 +265,26 @@ EXTERN_C __declspec(dllexport) void InitializeLogger(LOG_HANDLE* handle) {
 }
 
 
+///	設定関連初期化
+EXTERN_C __declspec(dllexport) void InitializeConfig(CONFIG_HANDLE* handle) {
+	config = handle;
+
+	Plugin_Name = config->translate(config, PLUGIN_NAME);
+	Plugin_Title = Plugin_Name + L" " + PLUGIN_VERSION;
+
+	LPCWSTR info_fmt = config->translate(config, L"%ls %ls (テスト済: %ls) by Garech");
+	wchar_t info_buf[512];
+	std::swprintf(info_buf, 512, info_fmt, Plugin_Name.c_str(), PLUGIN_VERSION, TESTED_BETA);
+	Plugin_Info = info_buf;
+}
+
+
 /// プラグインDLL初期化
 EXTERN_C __declspec(dllexport) bool InitializePlugin(DWORD version) {
 	if (version < TESTED_BETA_NO) {
-		MessageBox(get_aviutl2_window(), L"フィルタ分離を動作させるためには、AviUtl2 " TESTED_BETA L"が必要です。\nAviUtl2を更新してください。", PLUGIN_TITLE, MB_ICONWARNING);
+		wchar_t msg[512];
+		std::swprintf(msg, 512, config->translate(config, L"%lsを動作させるためには、AviUtl2 %lsが必要です。\nAviUtl2を更新してください。"), Plugin_Name.c_str(), TESTED_BETA);
+		MessageBox(get_aviutl2_window(), msg, Plugin_Title.c_str(), MB_ICONWARNING);
 		return false;
 	}
 	return true;
@@ -258,9 +293,23 @@ EXTERN_C __declspec(dllexport) bool InitializePlugin(DWORD version) {
 
 /// プラグイン登録
 EXTERN_C __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host) {
-	host->set_plugin_information(PLUGIN_INFO);
-	host->register_object_menu(L"フィルタ分離", split_filters_callback);
-	host->register_object_menu(L"フィルタ分離（グループ制御）", split_filters_for_group_callback);
-	host->register_object_menu(L"上のオブジェクトへフィルタ結合", merge_filters_callback);
+	host->set_plugin_information(Plugin_Info.c_str());
+
+	// 翻訳済のメニュー名を登録
+	g_registered_menu_names.push_back(config->translate(config, L"フィルタ分離"));
+	g_registered_menu_names.push_back(Plugin_Name + L"\\" + g_registered_menu_names.back());
+	g_registered_menu_names.push_back(config->translate(config, L"フィルタ分離（グループ制御）"));
+	g_registered_menu_names.push_back(Plugin_Name + L"\\" + g_registered_menu_names.back());
+	g_registered_menu_names.push_back(config->translate(config, L"上のオブジェクトへフィルタ結合"));
+	g_registered_menu_names.push_back(Plugin_Name + L"\\" + g_registered_menu_names.back());
+
+	host->register_object_menu(g_registered_menu_names[0].c_str(), split_filters_callback);
+	host->register_object_menu(g_registered_menu_names[2].c_str(), split_filters_for_group_callback);
+	host->register_object_menu(g_registered_menu_names[4].c_str(), merge_filters_callback);
+
+	host->register_edit_menu(g_registered_menu_names[1].c_str(), split_filters_callback);
+	host->register_edit_menu(g_registered_menu_names[3].c_str(), split_filters_for_group_callback);
+	host->register_edit_menu(g_registered_menu_names[5].c_str(), merge_filters_callback);
+
 	edit_handle = host->create_edit_handle();
 }

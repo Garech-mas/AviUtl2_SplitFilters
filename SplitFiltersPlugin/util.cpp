@@ -139,12 +139,17 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 
 /// フィルタ効果の開始インデックスを計算
 /// @param objs 解析済みの ObjSec ベクター
-/// @return [Object.1] が出力切替セクション（標準描画など）なら 2、それ以外は 1
+/// @return 2 または 1
 int calc_start_index(const std::vector<ObjSec>& objs) {
-	// [Object.1]が出力切替セクションなら2番目 それ以外は1番目
+	// [Object.0]が"フィルタオブジェクト"
+	if (objs[0].effect_name == u8"フィルタオブジェクト") return 2;
+
+	// [Object.1]が出力切替セクション
 	for (auto& s : OUTPUT_SECTION_LIST) {
 		if (objs[1].effect_name == s) return 2;
 	}
+
+	// それ以外は1番目
 	return 1;
 }
 
@@ -189,7 +194,12 @@ std::string build_target_alias(const std::string alias) {
 	int start = calc_start_index(objs);
 
 	// 再構築 [Object]～[Object.0]～[Object.n]
-	return header + rebuild_alias(objs, start, 0);
+	if (objs[0].effect_name == "フィルタオブジェクト") {
+		return header + FILTER_OBJECT_OBJ0 + rebuild_alias(objs, start, 1);
+	}
+	else {
+		return header + rebuild_alias(objs, start, 0);
+	}
 }
 
 
@@ -258,4 +268,32 @@ std::string build_source_alias(const std::string alias) {
 	filtered_objs.assign(objs.begin(), objs.begin() + max_idx);
 
 	return header + rebuild_alias(filtered_objs, 0, 0);
+}
+
+
+/// 指定範囲に被らない最初のレイヤーを返す
+/// @param edit 編集セクションハンドル
+/// @param start_layer 探索を開始するレイヤー（通常は元レイヤー+1）
+/// @param start_frame 探索対象の開始フレーム
+/// @param end_frame 探索対象の終了フレーム（開始 + 長さ）
+int find_available_layer(EDIT_SECTION* edit, int start_layer, int start_frame, int end_frame) {
+	for (int layer = start_layer; layer < SAFE_LAYER_LIMIT; ++layer) {
+		auto obj = edit->find_object(layer, start_frame);
+		if (!obj) {
+			// 指定フレームにオブジェクトが無ければそのレイヤーは使える
+			return layer;
+		}
+		auto lf = edit->get_object_layer_frame(obj);
+		// get_object_layer_frame の start が 0 の場合は無効とみなす
+		if (!lf.start) {
+			return layer;
+		}
+		// 重複判定: 範囲が交差するなら不可
+		// 交差しない条件: (lf.end <= start_frame) || (lf.start >= end_frame)
+		if (lf.end <= start_frame || lf.start >= end_frame) {
+			return layer;
+		}
+		// 交差する場合は次のレイヤーを試す
+	}
+	return -1;
 }

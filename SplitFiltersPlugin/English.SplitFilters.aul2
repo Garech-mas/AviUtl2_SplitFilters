@@ -1,0 +1,19 @@
+[SplitFilters.aux2]
+; Plugin information
+フィルタ分離=Split Filters
+%ls %ls (テスト済: %ls) by Garech=%ls %ls (Tested on: %ls) by Garech
+%lsを動作させるためには、AviUtl2 %lsが必要です。\nAviUtl2を更新してください。=To use %ls, AviUtl2 %ls is required.\nPlease update AviUtl2.
+
+; Log
+選択オブジェクトがありません。=No selected object.
+抽出できるフィルタ効果がありません。=No extractable filter effects.
+元オブジェクトの作成に失敗しました。=Failed to create source object.
+フィルタ効果オブジェクトの作成に失敗しました。=Failed to create filter effect object.
+グループ制御オブジェクトの作成に失敗しました。=Failed to create group control object.
+上のオブジェクトが存在しません。=No object above exists.
+フィルタ結合に失敗しました。元オブジェクトを復旧しました。=Failed to merge filters. Restored source object.
+
+; GUI
+フィルタ分離=Split Filters
+フィルタ分離（グループ制御）=Split Filters (Group Control)
+上のオブジェクトへフィルタ結合=Merge filters into the object above
