@@ -27,7 +27,7 @@ jobs:
       - name: Prepare package
         run: |
           mkdir dist
-          copy SplitFiltersPlugin\x64\Release\SplitFilters.aux2 dist\
+          copy x64\Release\SplitFilters.aux2 dist\
           copy README.md dist\README.txt
 
       - name: Create ZIP
