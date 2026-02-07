@@ -64,3 +64,12 @@ jobs:
           "body<<EOF" >> $env:GITHUB_OUTPUT
           $body >> $env:GITHUB_OUTPUT
           "EOF" >> $env:GITHUB_OUTPUT
+      
+      - name: Create GitHub Release (draft)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: フィルタ分離 ${{ github.ref_name }}
+          draft: true
+          body: ${{ steps.gen_body.outputs.body }}
+          files: SplitFilters-${{ github.ref_name }}.zip
