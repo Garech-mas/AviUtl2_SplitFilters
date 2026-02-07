@@ -36,7 +36,40 @@ jobs:
             dist\SplitFilters.aux2,dist\README.txt `
             SplitFilters-${{ github.ref_name }}.zip
 
-      - name: Create GitHub Release
+      - name: Generate release body from README
+        id: gen_body
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          $readme = Get-Content README.md -Raw
+
+          $pattern = "(?s)### $version.*?(?=### v|\z)"
+          $match = [regex]::Match($readme, $pattern)
+
+          if (-not $match.Success) {
+            Write-Error "Release notes for $version not found in README.md"
+          }
+
+          $body = @"
+$($match.Value)
+
+---
+下記の「SplitFilters-$version.zip」よりプラグインをダウンロードできます。
+
+※必ず[最新バージョンのAviUtl2](https://spring-fragrance.mints.ne.jp/aviutl/)を導入してください。（【★確認VER】で正常動作を確認しています。）  
+**【★確認VER-1】 以前ではプラグインが認識されない・使用できない場合があります。**
+"@
+
+          "body<<EOF" >> $env:GITHUB_OUTPUT
+          $body >> $env:GITHUB_OUTPUT
+          "EOF" >> $env:GITHUB_OUTPUT
+
+
+      - name: Create GitHub Release (draft)
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          name: フィルタ分離 ${{ github.ref_name }}
+          draft: true
+          body: ${{ steps.gen_body.outputs.body }}
           files: SplitFilters-${{ github.ref_name }}.zip
