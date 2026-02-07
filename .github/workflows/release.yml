@@ -1,0 +1,42 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Release
+        run: |
+          msbuild SplitFiltersPlugin.sln ^
+            /p:Configuration=Release ^
+            /p:Platform=x64
+
+      - name: Prepare package
+        run: |
+          mkdir dist
+          copy SplitFiltersPlugin\x64\Release\SplitFilters.aux2 dist\
+          copy README.md dist\README.txt
+
+      - name: Create ZIP
+        run: |
+          powershell Compress-Archive `
+            dist\SplitFilters.aux2,dist\README.txt `
+            SplitFilters-${{ github.ref_name }}.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: SplitFilters-${{ github.ref_name }}.zip

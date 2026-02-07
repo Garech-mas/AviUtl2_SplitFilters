@@ -284,13 +284,9 @@ int find_available_layer(EDIT_SECTION* edit, int start_layer, int start_frame, i
 			return layer;
 		}
 		auto lf = edit->get_object_layer_frame(obj);
-		// get_object_layer_frame の start が 0 の場合は無効とみなす
-		if (!lf.start) {
-			return layer;
-		}
 		// 重複判定: 範囲が交差するなら不可
 		// 交差しない条件: (lf.end <= start_frame) || (lf.start >= end_frame)
-		if (lf.end <= start_frame || lf.start >= end_frame) {
+		if (lf.end < start_frame || lf.start > end_frame) {
 			return layer;
 		}
 		// 交差する場合は次のレイヤーを試す

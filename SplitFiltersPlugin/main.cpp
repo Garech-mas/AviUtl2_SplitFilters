@@ -196,11 +196,11 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 		OBJECT_HANDLE source_obj = {};
 		OBJECT_LAYER_FRAME source_lf = {};
 
+		bool is_above_layer_empty = false;
 		for (int j = 1; j < SAFE_LAYER_LIMIT; j++) {
 			if (selected_lf.layer - j < 0) {
-				logger->info(logger, config->translate(config, L"上のオブジェクトが存在しません。"));
-				MessageBeep(-1);
-				return;
+				is_above_layer_empty = true;
+				break;
 			}
 			source_obj = edit->find_object(selected_lf.layer - j, selected_lf.start);
 			if (!source_obj) {
@@ -211,6 +211,13 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 				break;
 			}
 		}
+
+		if (is_above_layer_empty) {
+			logger->info(logger, config->translate(config, L"上のオブジェクトが存在しません。"));
+			MessageBeep(-1);
+			continue;
+		}
+
 		const char* source_alias_c = edit->get_object_alias(source_obj);
 		std::string source_alias = source_alias_c ? source_alias_c : std::string();
 		auto source_objs = parse_objects(source_alias);
