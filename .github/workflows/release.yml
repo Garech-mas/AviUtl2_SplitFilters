@@ -28,11 +28,12 @@ jobs:
           mkdir dist
           copy x64\Release\SplitFilters.aux2 dist\
           copy README.md dist\README.txt
+          copy SplitFiltersPlugin\English.SplitFilters.aul2 dist\English.SplitFilters.aul2
 
       - name: Create ZIP
         run: |
           powershell Compress-Archive `
-            dist\SplitFilters.aux2,dist\README.txt `
+            dist\SplitFilters.aux2,dist\README.txt,dist\English.SplitFilters.aul2 `
             SplitFilters-${{ github.ref_name }}.zip
 
       - name: Generate release body from README
