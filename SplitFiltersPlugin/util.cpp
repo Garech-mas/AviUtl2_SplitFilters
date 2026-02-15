@@ -139,18 +139,52 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 
 /// フィルタ効果の開始インデックスを計算
 /// @param objs 解析済みの ObjSec ベクター
+/// @param include_self_filter 自身のフィルタ効果を対象にするか
 /// @return 2 または 1
-int calc_start_index(const std::vector<ObjSec>& objs) {
-	// [Object.0]が"フィルタオブジェクト"
-	if (objs[0].effect_name == u8"フィルタオブジェクト") return 2;
-
-	// [Object.1]が出力切替セクション
-	for (auto& s : OUTPUT_SECTION_LIST) {
-		if (objs[1].effect_name == s) return 2;
+int calc_start_index(const std::vector<ObjSec>& objs, bool include_self_filter) {
+	if (include_self_filter) {
+		if (has_output_section(objs)) {
+			// 出力切り替えセクションがある場合、フィルタ効果は[Object.2]以降
+			return 2;
+		}
+		else if (is_none_output_object(objs)){
+			// 特殊メディアオブジェクトかフィルタオブジェクトの場合、フィルタ効果は[Object.1]以降
+			return 1;
+		}
+		else {
+			// それ以外(フィルタ効果)は[Object.0]以降
+			return 0;
+		}
 	}
+	else {
+		// フィルタオブジェクトなら、追加フィルタ効果は[Object.2]以降
+		if (objs[0].effect_name == u8"フィルタオブジェクト") return 2;
 
-	// それ以外は1番目
-	return 1;
+		// 自身のフィルタ効果を対象にしない場合、追加フィルタ効果は[Object.1] (+出力切り替えセクション) 以降
+		return 1 + has_output_section(objs);
+	}
+}
+
+
+/// 出力切り替えセクションがあるかを判定
+/// @param objs 解析済みの ObjSec ベクター
+/// @return true/false
+bool has_output_section(const std::vector<ObjSec>& objs) {
+	for (auto& s : OUTPUT_SECTION_LIST) {
+		if (objs[1].effect_name == s) return true;
+	}
+	return false;
+}
+
+
+/// 特殊メディアオブジェクトか判定 (グループ制御や部分フィルタなど、出力切り替えセクションを持たないもの)
+/// @param objs 解析済みの ObjSec ベクター
+/// @return true/false
+bool is_none_output_object(const std::vector<ObjSec>& objs) {
+	for (auto& s : NON_OUTPUT_SECTION_OBJECT_LIST) {
+		if (objs[0].effect_name == s) return true;
+	}
+	return false;
 }
 
 

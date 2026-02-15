@@ -39,6 +39,16 @@ static const char* OUTPUT_SECTION_LIST[] = {
 	u8"パーティクル出力"
 };
 
+static const char* NON_OUTPUT_SECTION_OBJECT_LIST[] = {
+	u8"フィルタオブジェクト",
+	u8"部分フィルタ",
+	u8"グループ制御",
+	u8"グループ制御(音声)",
+	u8"カメラ制御",
+	u8"時間制御(オブジェクト)",
+	u8"シーンチェンジ"
+};
+
 /// オブジェクトが被っているときに再試行する回数の上限
 const int SAFE_LAYER_LIMIT = 1000;
 
@@ -53,7 +63,9 @@ HWND get_aviutl2_window();
 std::wstring utf8_to_wide(const std::string& s);
 std::string extract_object_header(const std::string& alias);
 std::vector<ObjSec> parse_objects(const std::string& alias);
-int calc_start_index(const std::vector<ObjSec>& objs);
+int calc_start_index(const std::vector<ObjSec>& objs, bool include_self_filter = false);
+bool has_output_section(const std::vector<ObjSec>& objs);
+bool is_none_output_object(const std::vector<ObjSec>& objs);
 std::string rebuild_alias(
 	const std::vector<ObjSec>& objs,
 	int start_index,

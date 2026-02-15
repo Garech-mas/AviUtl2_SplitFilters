@@ -171,7 +171,6 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 
 /// オブジェクトメニュー「フィルタ結合」
 /// 選択中オブジェクトを上レイヤーのオブジェクトに結合する
-/// ※選択中オブジェクトが出力切替オブジェクト持ちなら、その下のオブジェクトを選択中オブジェクトに結合する
 static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 	int sel_num = edit->get_selected_object_num();
 	int i = 0;
@@ -192,6 +191,14 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 		std::string selected_alias = selected_alias_c ? selected_alias_c : std::string();
 		auto selected_objs = parse_objects(selected_alias);
 
+		// 追加フィルタ効果がない場合
+		auto filter_start_idx = calc_start_index(selected_objs, true);
+		if (filter_start_idx >= selected_objs.size()) {
+			logger->info(logger, config->translate(config, L"抽出できるフィルタ効果がありません。"));
+			MessageBeep(-1);
+			continue;
+		}
+		
 		// source_objを探す
 		OBJECT_HANDLE source_obj = {};
 		OBJECT_LAYER_FRAME source_lf = {};
@@ -222,7 +229,6 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 		std::string source_alias = source_alias_c ? source_alias_c : std::string();
 		auto source_objs = parse_objects(source_alias);
 		// selected_obj -> source_objに結合する
-		auto filter_start_idx = calc_start_index(selected_objs) - 1;
 		source_objs.insert(source_objs.end(), selected_objs.begin() + filter_start_idx, selected_objs.end());
 		auto merged_alias_str = extract_object_header(source_alias) + rebuild_alias(source_objs, 0, 0);
 
@@ -258,6 +264,8 @@ static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
 			else {
 				logger->warn(logger, config->translate(config, L"元オブジェクトの作成に失敗しました。"));
 			}
+			std::wstring merged_alias_w = utf8_to_wide(merged_alias_str);
+			logger->verbose(logger, merged_alias_w.c_str());
 			continue;
 		}
 		edit->set_focus_object(merged_obj);

@@ -9,7 +9,7 @@ extern LOG_HANDLE* logger;
 
 // --- プラグイン情報定数 ---
 #define PLUGIN_NAME L"フィルタ分離"
-#define PLUGIN_VERSION L"v1.04"
+#define PLUGIN_VERSION L"v1.05"
 #define TESTED_BETA L"beta31"
 #define TESTED_BETA_NO 2003100
 
