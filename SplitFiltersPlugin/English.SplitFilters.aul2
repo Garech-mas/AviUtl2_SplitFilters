@@ -17,3 +17,4 @@
 フィルタ分離=Split Filters
 フィルタ分離（グループ制御）=Split Filters (Group Control)
 上のオブジェクトへフィルタ結合=Merge filters into the object above
+上のオブジェクトへ先頭フィルタを結合=Merge the first filter into the object above
