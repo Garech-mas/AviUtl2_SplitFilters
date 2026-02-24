@@ -28,8 +28,8 @@ For non-Japanese users, please drag and drop `SplitFilters.aux2` and `English.Sp
 <img width="366" height="147" alt="image" src="https://github.com/user-attachments/assets/165a4e05-ba40-4730-b545-355b9c3a4118" />
 
 ### 上のオブジェクトへフィルタ結合
-- **フィルタ効果オブジェクトを**右クリック → `プラグイン` → `上のオブジェクトへフィルタ結合` で適用できます。
-- フィルタ効果/フィルタオブジェクトに適用されているすべてのフィルタ効果を、直上のオブジェクトに結合します。
+- オブジェクトを右クリック → `プラグイン` → `上のオブジェクトへフィルタ結合` で適用できます。
+- オブジェクトに適用されているすべてのフィルタ効果を、直上のオブジェクトに結合します。
 > [!WARNING]
 > ※オブジェクトの種類が通常で付けられない組み合わせの場合、正常に動作できません。
 <img width="363" height="154" alt="image" src="https://github.com/user-attachments/assets/2aea95c9-86e7-4f33-a749-7de5162f091e" />
