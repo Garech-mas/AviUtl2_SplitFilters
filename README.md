@@ -34,6 +34,12 @@ For non-Japanese users, please drag and drop `SplitFilters.aux2` and `English.Sp
 > ※オブジェクトの種類が通常で付けられない組み合わせの場合、正常に動作できません。
 <img width="363" height="154" alt="image" src="https://github.com/user-attachments/assets/2aea95c9-86e7-4f33-a749-7de5162f091e" />
 
+### 上のオブジェクトへ先頭フィルタを結合
+- オブジェクトを右クリック → `プラグイン` → `上のオブジェクトへフィルタ結合` で適用できます。
+- オブジェクトに適用されている1つ目のフィルタ効果を、直上のオブジェクトに結合します。
+- ※注意点は上記と同様です。
+<img width="362" height="159" alt="image" src="https://github.com/user-attachments/assets/75cb2fea-57b6-4f50-b1d3-bcaeded227e3" />
+
 
 ## 更新履歴
 ### v1.00 (テスト済: beta22)
@@ -62,3 +68,6 @@ For non-Japanese users, please drag and drop `SplitFilters.aux2` and `English.Sp
 
 ### v1.05 (テスト済: beta31)
 - 「上のオブジェクトへフィルタ結合」を通常メディアオブジェクトに対して行った場合、付属するフィルタを結合するように変更
+
+### v1.06 (テスト済: beta31)
+- 「上のオブジェクトへ先頭フィルタを結合」を追加。
