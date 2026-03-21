@@ -169,6 +169,84 @@ static void __cdecl split_filters_for_group_callback(EDIT_SECTION* edit) {
 }
 
 
+/// オブジェクトメニュー「フィルタ分離（画像合成）」
+/// 選択中オブジェクトのフィルタ効果部を画像合成オブジェクトに分離する
+static void __cdecl split_filters_for_composite_callback(EDIT_SECTION* edit) {
+	int sel_num = edit->get_selected_object_num();
+	int i = 0;
+	do {
+		OBJECT_HANDLE obj = edit->get_selected_object(i);
+		i++;
+		// 選択オブジェクトがなければ、フォーカス中のオブジェクトを使う
+		if (!obj) {
+			obj = edit->get_focus_object();
+			if (!obj) {
+				logger->info(logger, config->translate(config, L"選択オブジェクトがありません。"));
+				MessageBeep(-1);
+				return;
+			}
+		}
+
+		auto lf = edit->get_object_layer_frame(obj);
+		auto alias = edit->get_object_alias(obj);
+
+		// === 解析開始 ===
+		std::string a(alias);
+		auto objs = parse_objects(a);
+
+		// 追加フィルタ効果がない場合
+		if (calc_start_index(objs) >= objs.size()) {
+			logger->info(logger, config->translate(config, L"抽出できるフィルタ効果がありません。"));
+			MessageBeep(-1);
+			continue;
+		}
+
+		// 元オブジェクト - 分離フィルタ
+		std::string new_src_alias = build_source_alias(alias);
+
+		// === 元オブジェクトの置き換え (1レイヤー下に置く) ===
+		edit->delete_object(obj);
+		bool created = false;
+
+		// 重複しないレイヤーを探して元オブジェクトを作成
+		int free_layer = find_available_layer(edit, lf.layer + 1, lf.start, lf.end);
+		if (free_layer != -1) {
+			auto new_obj = edit->create_object_from_alias(
+				new_src_alias.c_str(),
+				free_layer,
+				lf.start,
+				lf.end - lf.start
+			);
+			if (new_obj) {
+				created = true;
+			}
+		}
+
+		if (!created) {
+			logger->warn(logger, config->translate(config, L"元オブジェクトの作成に失敗しました。"));
+			continue;
+		}
+
+		// 選択レイヤーに画像合成を追加
+		auto group_obj = try_create_composite(
+			edit,
+			std::string(alias),
+			lf.layer, lf.start,
+			lf.end - lf.start
+		);
+
+		if (!group_obj) {
+			logger->warn(logger, config->translate(config, L"画像合成オブジェクトの作成に失敗しました。"));
+			continue;
+		}
+
+		edit->set_object_name(group_obj, nullptr);
+		edit->set_focus_object(group_obj);
+
+	} while (i < sel_num);
+}
+
+
 /// オブジェクトメニュー「フィルタ結合」
 /// 選択中オブジェクトを上レイヤーのオブジェクトに結合する
 static void __cdecl merge_filters_callback(EDIT_SECTION* edit) {
@@ -450,6 +528,8 @@ EXTERN_C __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host) {
 	g_registered_menu_names.push_back(Plugin_Name + L"\\" + g_registered_menu_names.back());
 	g_registered_menu_names.push_back(config->translate(config, L"フィルタ分離（グループ制御）"));
 	g_registered_menu_names.push_back(Plugin_Name + L"\\" + g_registered_menu_names.back());
+	g_registered_menu_names.push_back(config->translate(config, L"フィルタ分離（画像合成）"));
+	g_registered_menu_names.push_back(Plugin_Name + L"\\" + g_registered_menu_names.back());
 	g_registered_menu_names.push_back(config->translate(config, L"上のオブジェクトへフィルタ結合"));
 	g_registered_menu_names.push_back(Plugin_Name + L"\\" + g_registered_menu_names.back());
 	g_registered_menu_names.push_back(config->translate(config, L"上のオブジェクトへ先頭フィルタを結合"));
@@ -457,13 +537,15 @@ EXTERN_C __declspec(dllexport) void RegisterPlugin(HOST_APP_TABLE* host) {
 
 	host->register_object_menu(g_registered_menu_names[0].c_str(), split_filters_callback);
 	host->register_object_menu(g_registered_menu_names[2].c_str(), split_filters_for_group_callback);
-	host->register_object_menu(g_registered_menu_names[4].c_str(), merge_filters_callback);
-	host->register_object_menu(g_registered_menu_names[6].c_str(), merge_head_filters_callback);
+	host->register_object_menu(g_registered_menu_names[4].c_str(), split_filters_for_composite_callback);
+	host->register_object_menu(g_registered_menu_names[6].c_str(), merge_filters_callback);
+	host->register_object_menu(g_registered_menu_names[8].c_str(), merge_head_filters_callback);
 
 	host->register_edit_menu(g_registered_menu_names[1].c_str(), split_filters_callback);
 	host->register_edit_menu(g_registered_menu_names[3].c_str(), split_filters_for_group_callback);
-	host->register_edit_menu(g_registered_menu_names[5].c_str(), merge_filters_callback);
-	host->register_edit_menu(g_registered_menu_names[7].c_str(), merge_head_filters_callback);
+	host->register_edit_menu(g_registered_menu_names[5].c_str(), split_filters_for_composite_callback);
+	host->register_edit_menu(g_registered_menu_names[7].c_str(), merge_filters_callback);
+	host->register_edit_menu(g_registered_menu_names[9].c_str(), merge_head_filters_callback);
 
 	edit_handle = host->create_edit_handle();
 }

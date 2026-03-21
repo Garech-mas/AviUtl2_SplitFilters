@@ -18,6 +18,28 @@ Z軸回転=0.00
 対象レイヤー数=1
 )";
 
+static const char* COMPOSITE_OBJ01 = u8R"(
+[Object.0]
+effect.name=画像合成(オブジェクト)
+対象レイヤー数=1
+[Object.1]
+effect.name=標準描画
+X=0.00
+Y=0.00
+Z=0.00
+Group=1
+中心X=0.00
+中心Y=0.00
+中心Z=0.00
+X軸回転=0.00
+Y軸回転=0.00
+Z軸回転=0.00
+拡大率=100.000
+縦横比=0.000
+透明度=0.00
+合成モード=通常
+)";
+
 static const char* FILTER_OBJECT_OBJ0 = u8R"(
 [Object.0]
 effect.name=フィルタオブジェクト
@@ -75,6 +97,10 @@ std::string build_source_alias(const std::string alias);
 std::string build_target_alias(const std::string alias);
 std::string build_target_alias_group(const std::string alias);
 OBJECT_HANDLE try_create_group(
+	EDIT_SECTION* edit,
+	const std::string& alias,
+	int layer, int start, int length);
+OBJECT_HANDLE try_create_composite(
 	EDIT_SECTION* edit,
 	const std::string& alias,
 	int layer, int start, int length);

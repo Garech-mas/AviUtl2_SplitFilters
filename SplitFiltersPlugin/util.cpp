@@ -237,17 +237,18 @@ std::string build_target_alias(const std::string alias) {
 }
 
 
-/// エイリアスに付くフィルタを抽出して、フィルタ効果群を作成（グループ制御に紐づける用）
+/// エイリアスに付くフィルタを抽出して、フィルタ効果群を作成
 /// @param alias: エイリアスデータ
-/// @return フィルタ効果オブジェクト群を含むエイリアス文字列。
-static std::string build_target_alias_group(const std::string alias) {
+/// @param index: セクションの構築開始位置
+/// @return フィルタ効果オブジェクト群を含むエイリアス文字列
+static std::string build_target_alias_group(const std::string alias, int index) {
 	auto objs = parse_objects(alias);
 	if (objs.empty()) return "";
 
 	int start = calc_start_index(objs);
 
-	// 再構築 [Object.1]～[Object.n]
-	return rebuild_alias(objs, start, 1);
+	// 再構築 [Object.index]～[Object.n]
+	return rebuild_alias(objs, start, index);
 }
 
 
@@ -264,7 +265,7 @@ OBJECT_HANDLE try_create_group(
 	std::string header = extract_object_header(alias);
 
 	// [Object.1]～ を作成
-	std::string obj1 = build_target_alias_group(alias);
+	std::string obj1 = build_target_alias_group(alias, 1);
 
 	// グループ制御を作成
 	{
@@ -276,6 +277,32 @@ OBJECT_HANDLE try_create_group(
 	// 上記がdifferent effect typeで作成できなかったら、グループ制御(音声) を作る
 	{
 		std::string a = header + std::string(GROUP_AUDIO_OBJ0) + obj1;
+		auto o = edit->create_object_from_alias(a.c_str(), layer, start, length);
+		if (o) return o;
+	}
+
+	return nullptr;
+}
+
+
+/// エイリアスに付くフィルタを抽出して、画像合成オブジェクトを作成
+/// @param edit: 編集セクション構造体
+/// @param alias: エイリアスデータ
+/// @return 画像合成オブジェクトのハンドル (作成できなければ nullptr)
+OBJECT_HANDLE try_create_composite(
+	EDIT_SECTION* edit,
+	const std::string& alias,
+	int layer, int start, int length)
+{
+	// [Object] ヘッダを抽出
+	std::string header = extract_object_header(alias);
+
+	// [Object.2]～ を作成
+	std::string obj2 = build_target_alias_group(alias, 2);
+
+	// 画像合成を作成
+	{
+		std::string a = header + std::string(COMPOSITE_OBJ01) + obj2;
 		auto o = edit->create_object_from_alias(a.c_str(), layer, start, length);
 		if (o) return o;
 	}
