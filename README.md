@@ -61,6 +61,8 @@ For non-Japanese users, please drag and drop `SplitFilters.aux2` and `English.Sp
 > 中心XYZを分離する場合、Basic_Sの導入が必須となります。導入されていない場合は分離できません。
 > 
 > [プラグイン紹介サイトへのURL](https://github.com/sigma-axis/aviutl2_script_Basic_S) / [AviUtl2 カタログで開く](https://aviutl2-catalog-badge.sevenc7c.workers.dev/package/sigma-axis.Basic_S)
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/50752bdf-970c-4709-bb1b-fb94cb92c48c" />
+
 
 
 ## 更新履歴
