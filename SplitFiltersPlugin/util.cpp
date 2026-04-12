@@ -128,8 +128,46 @@ std::vector<ObjSec> parse_objects(const std::string& alias) {
 			}
 		}
 
+        // ObjSec を作成
+        ObjSec o;
+        o.sec = sec;
+        o.index = idx;
+        o.effect_name = effect_name;
+
+		// --- パラメータ抽出の繰り返し処理 ---
+		size_t cur = 0;
+		while (cur < sec.size()) {
+			// 現在位置から行末の CRLF を探す
+			size_t line_end = sec.find("\r\n", cur);
+			std::string line;
+
+			if (line_end == std::string::npos) {
+				// 次の CRLF が見つからなかった場合、行の末尾まで
+				line = sec.substr(cur);
+				cur = sec.size();
+			}
+			else {
+				// CRLF が見つかった場合、CRLF の直前まで
+				line = sec.substr(cur, line_end - cur);
+				cur = line_end + 2;
+			}
+
+			// セクションヘッダー行は無視
+			if (line[0] == '[') continue;
+
+			// key=value のパラメータを抽出
+			size_t eq = line.find('=');
+			std::string key = line.substr(0, eq);
+			std::string value = line.substr(eq + 1);
+
+			// props に保存する
+			if (!key.empty()) {
+				o.props[key] = value;
+			}
+		}
+
 		// 抽出した情報を結果ベクタに追加し、次の検索位置を更新する
-		out.push_back({ sec, idx, effect_name });
+		out.push_back(o);
 		pos = next_head;
 	}
 
@@ -217,8 +255,8 @@ std::string rebuild_alias(
 }
 
 
-/// エイリアスに付くフィルタを抽出して、フィルタ効果オブジェクトを作成
-/// @param alias: エイリアスデータ
+/// エイリアスに付くフィルタを抽出して、フィルタ効果オブジェクトを作成する
+/// @param alias エイリアスデータ
 /// @return フィルタ効果オブジェクトのエイリアスデータ
 std::string build_target_alias(const std::string alias) {
 	std::string header = extract_object_header(alias);
@@ -237,9 +275,9 @@ std::string build_target_alias(const std::string alias) {
 }
 
 
-/// エイリアスに付くフィルタを抽出して、フィルタ効果群を作成
-/// @param alias: エイリアスデータ
-/// @param index: セクションの構築開始位置
+/// エイリアスに付くフィルタを抽出して、フィルタ効果群を作成する
+/// @param alias エイリアスデータ
+/// @param index セクションの構築開始位置
 /// @return フィルタ効果オブジェクト群を含むエイリアス文字列
 static std::string build_target_alias_group(const std::string alias, int index) {
 	auto objs = parse_objects(alias);
@@ -252,10 +290,13 @@ static std::string build_target_alias_group(const std::string alias, int index) 
 }
 
 
-/// エイリアスに付くフィルタを抽出して、グループ制御オブジェクトを作成
-/// @param edit: 編集セクション構造体
-/// @param alias: エイリアスデータ
-/// @return グループ制御オブジェクトのハンドル (作成できなければ nullptr)
+/// エイリアスに付くフィルタを抽出して、グループ制御オブジェクトを作成する
+/// @param edit 編集セクション構造体
+/// @param alias エイリアスデータ
+/// @param layer オブジェクトを作成するレイヤー番号
+/// @param start オブジェクトの開始フレーム
+/// @param length オブジェクトの長さ
+/// @return グループ制御オブジェクトのハンドル。作成できなければ nullptr
 OBJECT_HANDLE try_create_group(
 	EDIT_SECTION* edit,
 	const std::string& alias,
@@ -285,9 +326,12 @@ OBJECT_HANDLE try_create_group(
 }
 
 
-/// エイリアスに付くフィルタを抽出して、画像合成オブジェクトを作成
-/// @param edit: 編集セクション構造体
-/// @param alias: エイリアスデータ
+/// エイリアスに付くフィルタを抽出して、画像合成オブジェクトを作成する
+/// @param edit 編集セクション構造体
+/// @param alias エイリアスデータ
+/// @param layer オブジェクトを作成するレイヤー番号
+/// @param start オブジェクトの開始フレーム
+/// @param length オブジェクトの長さ
 /// @return 画像合成オブジェクトのハンドル (作成できなければ nullptr)
 OBJECT_HANDLE try_create_composite(
 	EDIT_SECTION* edit,
@@ -311,8 +355,9 @@ OBJECT_HANDLE try_create_composite(
 }
 
 
-/// 元オブジェクトから分離フィルタを削除したものを作成
-/// @param alias: エイリアスデータ
+/// 元オブジェクトから分離フィルタを削除したエイリアスを作成する
+/// @param alias エイリアスデータ
+/// @return 分離フィルタを除いた元オブジェクトのエイリアスデータ
 std::string build_source_alias(const std::string alias) {
 	// エイリアスデータをパース
 	const auto objs = parse_objects(alias);
@@ -337,6 +382,7 @@ std::string build_source_alias(const std::string alias) {
 /// @param start_layer 探索を開始するレイヤー（通常は元レイヤー+1）
 /// @param start_frame 探索対象の開始フレーム
 /// @param end_frame 探索対象の終了フレーム（開始 + 長さ）
+/// @return 使用可能なレイヤー番号。見つからなければ -1
 int find_available_layer(EDIT_SECTION* edit, int start_layer, int start_frame, int end_frame) {
 	for (int layer = start_layer; layer < SAFE_LAYER_LIMIT; ++layer) {
 		auto obj = edit->find_object(layer, start_frame);
@@ -353,4 +399,231 @@ int find_available_layer(EDIT_SECTION* edit, int start_layer, int start_frame, i
 		// 交差する場合は次のレイヤーを試す
 	}
 	return -1;
+}
+
+
+/// 標準描画の「拡大率」と「縦横比」を拡大率フィルタに変換する
+/// @param src 変換元のオブジェクトセクション
+/// @param def 基本効果フィルタ定義
+/// @param out 生成結果のオブジェクトセクション
+/// @return 拡大率フィルタを生成した場合は true
+static bool build_zoom_filter(const ObjSec& src, const BasicEffectDef& def, ObjSec& out) {
+	// 拡大率
+	double scale = 100.000;
+	auto scale_it = src.props.find(u8"拡大率");
+	bool has_scale_prop = scale_it != src.props.end();
+	bool has_scale = has_scale_prop && get_prop_as_double(src, u8"拡大率", scale);
+	// 移動無しかつ、拡大率 = 100.000 の場合は、フィルタの作成対象外
+	bool scale_no_change = !has_scale_prop || (has_scale && scale == 100.000);
+
+	// 縦横比
+	double aspect = 0.000;
+	auto aspect_it = src.props.find(u8"縦横比");
+	bool has_aspect_prop = aspect_it != src.props.end();
+	bool has_aspect = has_aspect_prop && get_prop_as_double(src, u8"縦横比", aspect);
+	// 移動ありもしくは、縦横比 = 0.000 の場合は、フィルタの作成対象外
+	bool aspect_no_change = !has_aspect_prop || !has_aspect || aspect == 0.000;
+	
+	if (scale_no_change && aspect_no_change) return false;
+
+	// 拡大率の値を取得
+	std::string scale_val = (!has_scale_prop || scale_no_change) ? "100.000" : scale_it->second;
+	
+	// 縦横比からX拡大率 / Y拡大率を算出
+	std::string x_val = "100.000";
+	std::string y_val = "100.000";
+
+	if (!aspect_no_change) {
+		if (aspect < 0) {
+			char buf[64];
+			sprintf_s(buf, "%.3f", 100.0 + aspect);
+			y_val = buf;
+		}
+		else if (aspect > 0) {
+			char buf[64];
+			sprintf_s(buf, "%.3f", 100.0 - aspect);
+			x_val = buf;
+		}
+	}
+
+	out.props[u8"拡大率"] = scale_val;
+	out.props["X"] = x_val;
+	out.props["Y"] = y_val;
+	out.props["Z"] = "100.000";
+
+	out.sec = std::string("[Object.0]\r\n")
+		+ u8"effect.name=拡大率\r\n"
+		+ u8"拡大率=" + scale_val + "\r\n"
+		+ "X=" + x_val + "\r\n"
+		+ "Y=" + y_val + "\r\n"
+		+ "Z=100.000\r\n";
+
+	return true;
+}
+
+
+/// 拡大率の元パラメータをリセットする
+/// @param src リセット対象のオブジェクトセクション
+/// @param def 基本効果フィルタ定義
+static void reset_zoom_params(ObjSec& src, const BasicEffectDef& def) {
+	src.props[u8"拡大率"] = "100.000";
+	double aspect = 0.000;
+	if (get_prop_as_double(src, u8"縦横比", aspect)) {
+		// 移動なしの場合はリセット
+		src.props[u8"縦横比"] = "0.000";
+	}
+}
+
+
+/// 基本効果フィルタ定義テーブル
+const std::vector<BasicEffectDef> BASIC_EFFECT_DEFS = {
+	{ u8"座標", {						// 転記先フィルタ名
+		{ "X",			 "X", "0.00" },	// 標準描画での転記元パラメータ名, 転記先パラメータ名, デフォルト値
+		{ "Y",			 "Y", "0.00" },
+		{ "Z",			 "Z", "0.00" },
+	}, nullptr, nullptr},				// (転記以外のときの)フィルタビルド関数、元パラメータリセット関数
+	{ u8"回転中心@Basic_S", {
+		{ u8"中心X",	 "X", "0.00" },
+		{ u8"中心Y",	 "Y", "0.00" },
+		{ u8"中心Z",	 "Z", "0.00" },
+	}, nullptr, nullptr},
+	{ u8"回転", {
+		{ u8"X軸回転",	 "X", "0.00" },
+		{ u8"Y軸回転",	 "Y", "0.00" },
+		{ u8"Z軸回転",	 "Z", "0.00" },
+	}, nullptr, nullptr},
+	{ u8"拡大率", {
+		{ u8"拡大率",	 u8"拡大率", "100.000" },
+		{ u8"縦横比",	 u8"縦横比", "0.000" },
+	}, build_zoom_filter, reset_zoom_params },
+	{ u8"透明度", {
+		{ u8"透明度",	 u8"透明度", "0.00" },
+	}, nullptr, nullptr},
+};
+
+
+/// 基本効果のフィルタ群を生成する
+/// @param objs 解析済みの ObjSec ベクター
+/// @return 生成した基本効果フィルタ群
+std::vector<ObjSec> build_basic_effect_filters(const std::vector<ObjSec>& objs) {
+	std::vector<ObjSec> results;
+
+	if (objs.size() < 2) return results;
+	if (!has_output_section(objs)) return results;
+
+	for (auto& def : BASIC_EFFECT_DEFS) {
+		ObjSec out;
+		out.index = 0;
+		out.effect_name = def.effect_name;
+
+		if (def.custom_build) {
+			// カスタムビルダーに委譲
+			if (def.custom_build(objs[1], def, out)) {
+				results.push_back(out);
+			}
+		}
+		else {
+			// 通常マッピング: 全マッピングがデフォルトならスキップ
+			bool all_default = true;
+			for (auto& m : def.mappings) {
+				if (!is_prop_default(objs[1], m.src_key, m.default_val)) {
+					all_default = false;
+					break;
+				}
+			}
+			if (all_default) continue;
+
+			std::string body;
+			for (auto& m : def.mappings) {
+				bool is_default = is_prop_default(objs[1], m.src_key, m.default_val);
+				std::string val = is_default ? m.default_val : objs[1].props.at(m.src_key);
+				out.props[m.dst_key] = val;
+				body += m.dst_key + "=" + val + "\r\n";
+			}
+
+			out.sec = std::string("[Object.0]\r\n")
+				+ "effect.name=" + def.effect_name + "\r\n"
+				+ body;
+			results.push_back(out);
+		}
+	}
+
+	return results;
+}
+
+
+/// 基本効果から分離された元パラメータをリセットする
+/// @param objs リセット対象を含む ObjSec ベクター
+/// @param filters 分離した基本効果フィルタ群
+void reset_basic_effect_params(std::vector<ObjSec>& objs, const std::vector<ObjSec>& filters) {
+	if (objs.size() < 2) return;
+
+	// filters に含まれる effect_name に対応する定義を探してリセット
+	for (auto& filter : filters) {
+		for (auto& def : BASIC_EFFECT_DEFS) {
+			if (def.effect_name != filter.effect_name) continue;
+			if (def.custom_reset) {
+				def.custom_reset(objs[1], def);
+			}
+			else {
+				for (auto& m : def.mappings) {
+					objs[1].props[m.src_key] = m.default_val;
+				}
+			}
+			break;
+		}
+	}
+
+	// sec 文字列を再構築
+	size_t old_end = objs[1].sec.find("]");
+	std::string header_part = objs[1].sec.substr(0, (old_end == std::string::npos) ? 0 : old_end + 1);
+	std::string body;
+	body += std::string("\r\n") + "effect.name=" + objs[1].effect_name + "\r\n";
+	for (auto& kv : objs[1].props) {
+		if (kv.first == "effect.name") continue;
+		body += kv.first + "=" + kv.second + "\r\n";
+	}
+	if (!header_part.empty()) objs[1].sec = header_part + body;
+}
+
+/// out にパラメータの値を入れる ※移動ありの場合は取得できない
+/// @param obj 参照元のオブジェクトセクション
+/// @param key 取得するパラメータ名
+/// @param out 取得した数値の出力先
+/// @return 数値として取得できた場合は true
+bool get_prop_as_double(const ObjSec& obj, const std::string& key, double& out) {
+    auto it = obj.props.find(key);
+    if (it == obj.props.end()) return false;	// key が存在しない場合は取得できない
+    const std::string& val = it->second;
+    if (val.find(',') != std::string::npos) return false;	// カンマを含む(移動あり)の場合は取得できない
+    try {
+        out = std::stod(val);
+        return true;
+    } catch (...) {
+        return false;	// 数値でない場合(文字列)は取得できない
+    }
+}
+
+/// props の値がデフォルト値かどうかを判定する
+/// @param obj 判定対象のオブジェクトセクション
+/// @param key 判定するパラメータ名
+/// @param default_val 比較するデフォルト値
+/// @return デフォルト値とみなせる場合は true
+bool is_prop_default(const ObjSec& obj, const std::string& key, const std::string& default_val) {
+	auto it = obj.props.find(key);
+	// キーが存在しなければデフォルトとみなす
+	if (it == obj.props.end()) return true;
+	const std::string& val = it->second;
+	// カンマを含む場合はアニメーションデータなので非デフォルト
+	if (val.find(',') != std::string::npos) return false;
+
+	try {
+		double current = std::stod(val);
+		double def = std::stod(default_val);
+		return current == def;
+	}
+	catch (...) {
+		// 数値でない場合は完全一致のみデフォルト
+		return val == default_val;
+	}
 }

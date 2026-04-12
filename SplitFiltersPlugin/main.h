@@ -9,9 +9,9 @@ extern LOG_HANDLE* logger;
 
 // --- プラグイン情報定数 ---
 #define PLUGIN_NAME L"フィルタ分離"
-#define PLUGIN_VERSION L"v1.06"
-#define TESTED_BETA L"beta31"
-#define TESTED_BETA_NO 2003100
+#define PLUGIN_VERSION L"v1.07"
+#define TESTED_BETA L"beta41"
+#define TESTED_BETA_NO 2004100
 
 
 // --- DLLエクスポート関数宣言 ---

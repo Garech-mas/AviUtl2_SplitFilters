@@ -10,6 +10,9 @@
 元オブジェクトの作成に失敗しました。=Failed to create source object.
 フィルタ効果オブジェクトの作成に失敗しました。=Failed to create filter effect object.
 グループ制御オブジェクトの作成に失敗しました。=Failed to create group control object.
+画像合成オブジェクトの作成に失敗しました。=Failed to create image composite object.
+分離する基本効果がありません。=No basic effects to split.
+基本効果フィルタの作成に失敗しました。=Failed to create basic effect filters.
 上のオブジェクトが存在しません。=No object above exists.
 フィルタ結合に失敗しました。元オブジェクトを復旧しました。=Failed to merge filters. Restored source object.
 
@@ -17,5 +20,6 @@
 フィルタ分離=Split Filters
 フィルタ分離（グループ制御）=Split Filters (Group Control)
 フィルタ分離（画像合成）=Split Filters (Image Composite)
+基本効果分離=Split Basic Effects
 上のオブジェクトへフィルタ結合=Merge filters into the object above
 上のオブジェクトへ先頭フィルタを結合=Merge the first filter into the object above

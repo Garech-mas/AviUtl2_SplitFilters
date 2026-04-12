@@ -1,7 +1,15 @@
 # AviUtl2 フィルタ分離プラグイン
 オブジェクトに付いているフィルタ効果群を個別オブジェクトに分離するAviUtl2 プラグインです。
 
-## 導入方法
+## 導入方法（自動・おすすめ）
+https://aviutl2-catalog-badge.sevenc7c.workers.dev/package/Garech.SplitFilters
+
+上記のリンクにアクセスした後、「インストール」ボタンからダウンロード・インストールできます。
+
+> [!INFO]
+> [AviUtl2 カタログ](https://github.com/Neosku/aviutl2-catalog/releases/latest) をインストールしている必要があります。
+
+## 導入方法（手動）
 https://github.com/Garech-mas/AviUtl2-SplitFilters/releases/latest
 
 上記のリンクにアクセスした後、`SplitFilters-v1.xx.zip` からダウンロードできます。
@@ -40,6 +48,16 @@ For non-Japanese users, please drag and drop `SplitFilters.aux2` and `English.Sp
 - ※注意点は上記と同様です。
 <img width="362" height="159" alt="image" src="https://github.com/user-attachments/assets/75cb2fea-57b6-4f50-b1d3-bcaeded227e3" />
 
+### 基本効果分離
+- オブジェクトを右クリック → `プラグイン` → `基本効果分離` で適用できます。
+- XYZ/中心XYZ/XYZ軸回転/拡大率/縦横比/透明度のパラメータを、それぞれ基本効果のフィルタ効果として移し替えます。
+> [!INFO]
+> オブジェクトや設定状態によっては、分離できない場合があります。
+> 例えば、縦横比に移動方法が設定されている場合、拡大率フィルタで再現できないことがあるため分離できません。
+> [!INFO]
+> 中心XYZを分離する場合、Basic_Sの導入が必須となります。導入されていない場合は分離できません。
+> [プラグイン紹介サイトへのURL](https://github.com/sigma-axis/aviutl2_script_Basic_S) / [AviUtl2 カタログで開く](https://aviutl2-catalog-badge.sevenc7c.workers.dev/package/sigma-axis.Basic_S)
+
 
 ## 更新履歴
 ### v1.00 (テスト済: beta22)
@@ -71,3 +89,7 @@ For non-Japanese users, please drag and drop `SplitFilters.aux2` and `English.Sp
 
 ### v1.06 (テスト済: beta31)
 - 「上のオブジェクトへ先頭フィルタを結合」を追加。
+
+### v1.07 (テスト済: beta41)
+- 「基本効果分離」を追加。
+- 出力切替が「仮想バッファ出力」の場合にエラーになる問題を修正。
